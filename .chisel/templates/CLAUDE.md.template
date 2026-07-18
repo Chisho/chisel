@@ -1,0 +1,22 @@
+# CLAUDE.md
+
+## What This Project Does
+
+{{PROJECT_DESCRIPTION}}
+
+## How to Run
+
+{{RUN_INSTRUCTIONS}}
+
+## Rules (auto-loaded)
+
+Essential rules live in `.claude/rules/rules.md` — edit there to add/remove.
+
+## Agents
+
+Available in `.claude/agents/`:
+{{AGENTS_LIST}}
+
+## Context Files (load on demand)
+
+{{CONTEXT_FILES_LIST}}

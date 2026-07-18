@@ -1,0 +1,69 @@
+---
+description: Essential rules — always loaded
+---
+# Generic Rules
+
+## Driver-Mode (Operating Mode)
+
+Track the current driver-mode for this conversation. Two values:
+
+- **`backseat`** (default) — operate normally: use `Edit`, `Write`, `NotebookEdit` to make changes directly; let the user review afterwards.
+- **`mainseat`** — do NOT call `Edit`, `Write`, or `NotebookEdit`. Walk the user through changes in plain language and provide ready-to-paste snippets the user applies themselves.
+
+Mode is set conversationally:
+
+- Every new conversation starts in **backseat** (the default).
+- `/dev_mainseat` flips this conversation to mainseat.
+- `/dev_backseat` reverts to backseat.
+
+When launching a code-modifying subagent (e.g. frontend-developer, backend-developer, embedded-developer) while in **mainseat**, include the directive *"Operate in mainseat mode — provide ready-to-paste snippets, do not call Edit/Write."* in the subagent's task description so the subagent inherits the mode. Read-only subagents (architect, code-reviewer, security-expert) don't need this — they can't edit anyway.
+
+## Pre-Production — No Legacy
+
+{{IF_PREPRODUCTION}}
+This project is in active development with no production deployment or users. Therefore:
+
+- **No backward compatibility code.** If a schema, API, or format changes, update all consumers. No fallback paths for old formats.
+- **No deprecated patterns or "legacy" labels.** If something is replaced, delete the old version entirely.
+- **No stale documentation.** Context files must reflect the current implementation, not historical states. Remove outdated references immediately.
+- **No dead code.** Unused functions, imports, and types must be deleted, not commented out or left "for later."
+{{/IF_PREPRODUCTION}}
+
+## Workflow
+
+Follow this explicit sequence for every task:
+
+**1. Explore**
+Load relevant `.docs/` files, then read the codebase sections that will be affected.
+
+**2. Plan**
+Present a clear implementation plan for user review before writing any code.
+
+**3. Implement**
+Start work only after the plan is approved.
+
+**4. Test**
+{{TEST_INSTRUCTIONS}}
+
+**5. Housekeeping**
+Update relevant `.docs/` docs if something meaningful changed. Move the task from `todo.md` to `todo_done.md`. If a new system or concept was introduced that doesn't fit an existing doc, ask the user if it's worth creating a new `.docs/` file. When a doc is added or removed, update both the `.docs/` folder and the Context Files list in `CLAUDE.md` to stay in sync. **If project scope, stack, or run instructions change, update `CLAUDE.md` ("What This Project Does" / "How to Run") to match — it's a hand-written doc and won't drift in sync on its own.**
+
+## Missing Setup Data (`{{TODO}}` markers)
+
+When the user makes a request, check whether `.docs/` files contain `{{TODO: ...}}` markers in sections the request depends on (tech stack, deployment target, project scope, key systems, etc.). If a relevant TODO is unfilled, **stop and tell the user which TODO is in the way** — name the file, the section, and what's missing. Do not guess or invent values.
+
+## No Hardcoded User Paths
+
+Use `~` or `$HOME`, never absolute paths with username.
+
+## Agents
+
+Use specialized agents (`.claude/agents/`) for domain-specific tasks. Agents can run in foreground or background. Always tell the user which agent you are invoking and why before launching it.
+
+{{AGENT_DESCRIPTIONS}}
+
+---
+
+# Project-Specific Rules
+
+{{PROJECT_RULES}}

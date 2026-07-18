@@ -1,0 +1,21 @@
+# TODO — {{PROJECT_NAME}} Open Tasks & Bugs
+
+Only NOT DONE items. For completed tasks and fixed bugs, see `.docs/todo_done.md`.
+
+> **Convention:** New entries are always added **at the end** of their type section.
+> After adding an entry, **increment the tally** at the bottom of that section to keep the count accurate.
+> The tally tracks: total count (open + done across both files). Used to correctly index the next entry when adding.
+
+---
+
+## Priority Legend
+
+{{PRIORITY_SCALE}}
+
+Entries are grouped by **type**:
+
+{{TASK_TYPES}}
+
+---
+
+{{TYPE_SECTIONS}}
