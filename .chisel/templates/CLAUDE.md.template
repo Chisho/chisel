@@ -12,6 +12,10 @@
 
 Essential rules live in `.claude/rules/rules.md` — edit there to add/remove.
 
+## Workflow
+
+Requests are triaged into Direct / Quick / Feature (see rules). Feature work: `/dev_feature` → `/dev_plan` → `/dev_execute`; bugs: `/dev_debug`; test-first: `/dev_tdd`. TASK folders live in `.docs/tasks/`. User manual: `.docs/manual.md`.
+
 ## Agents
 
 Available in `.claude/agents/`:

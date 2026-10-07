@@ -29,15 +29,27 @@ This project is in active development with no production deployment or users. Th
 - **No dead code.** Unused functions, imports, and types must be deleted, not commented out or left "for later."
 {{/IF_PREPRODUCTION}}
 
-## Workflow
+## Workflow — Triage
 
-Follow this explicit sequence for every task:
+Before acting on any request, pick a tier. Ask the two questions in order:
+
+1. **Does any feature signal fire?** — a new feature or capability; spans several subsystems or ~5+ files; design decisions the user hasn't made; naturally splits into independent pieces. → If yes, propose in one line: *"This looks like a feature — run it as a TASK with a spec, or keep it quick?"* and wait.
+2. **Do all direct conditions hold?** — localized (one function / a few lines / one file); the request says exactly what to do; no design choice; no new dependency. → If yes, **Direct**.
+3. Otherwise → **Quick**.
+
+When unsure, pick the heavier tier. Escalation is one-way: if work turns out bigger than its tier, stop, say so, and step up. The user can override either way ("just do it" / `/dev_feature`). `BUG` entries go through `/dev_debug` in any tier above Direct. Driver-mode applies to every tier.
+
+## Workflow — Direct
+
+Make the change → verify (run the relevant test, or at least build/lint) → report in one or two lines. No plan, no approval, no todo entry. If it touches a second file or breaks a call site, stop and switch to Quick.
+
+## Workflow — Quick
 
 **1. Explore**
 Load relevant `.docs/` files, then read the codebase sections that will be affected.
 
 **2. Plan**
-Present a clear implementation plan for user review before writing any code.
+Present a short implementation plan in chat for user review before writing any code.
 
 **3. Implement**
 Start work only after the plan is approved.
@@ -46,7 +58,19 @@ Start work only after the plan is approved.
 {{TEST_INSTRUCTIONS}}
 
 **5. Housekeeping**
-Update relevant `.docs/` docs if something meaningful changed. Move the task from `todo.md` to `todo_done.md`. If a new system or concept was introduced that doesn't fit an existing doc, ask the user if it's worth creating a new `.docs/` file. When a doc is added or removed, update both the `.docs/` folder and the Context Files list in `CLAUDE.md` to stay in sync. **If project scope, stack, or run instructions change, update `CLAUDE.md` ("What This Project Does" / "How to Run") to match — it's a hand-written doc and won't drift in sync on its own.**
+Update relevant `.docs/` docs if something meaningful changed. Move the entry from `todo.md` to `todo_done.md`. If a new system or concept was introduced that doesn't fit an existing doc, ask the user if it's worth creating a new `.docs/` file. When a doc is added or removed, update both the `.docs/` folder and the Context Files list in `CLAUDE.md` to stay in sync. **If project scope, stack, or run instructions change, update `CLAUDE.md` ("What This Project Does" / "How to Run") to match — it's a hand-written doc and won't drift in sync on its own.**
+
+## Workflow — Feature
+
+`/dev_feature` (brainstorm → `spec.md`) → `/dev_plan` (work items → `plan.md`) → `/dev_execute` (agents implement, `code-reviewer` checks, TASK closes). Each step waits for approval and offers the next. Everything for the TASK lives in `.docs/tasks/TASK-NNN-<slug>/`; Markdown is the source of truth, the `.html` files are generated views.
+
+## Verify Before Claiming Done
+
+Never say "done", "fixed", or "passing" without running the check in this turn and showing its output. No "should work".
+
+## Review Feedback
+
+Treat review feedback (from `code-reviewer` or a person) as claims to verify, not orders. Check each point against the code; apply what holds, push back with reasons on what doesn't.
 
 ## Missing Setup Data (`{{TODO}}` markers)
 
@@ -59,6 +83,8 @@ Use `~` or `$HOME`, never absolute paths with username.
 ## Agents
 
 Use specialized agents (`.claude/agents/`) for domain-specific tasks. Agents can run in foreground or background. Always tell the user which agent you are invoking and why before launching it.
+
+`code-reviewer` is always present — `/dev_execute` uses it to check every work item.
 
 {{AGENT_DESCRIPTIONS}}
 
