@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1f2328;--muted:#5d646d;--line:#e3e0d8;--accent:#2f6f5e;--code:#f1efe9;--banner:#fff4d6}
+@media (prefers-color-scheme:dark){:root{--bg:#16181b;--fg:#e6e6e3;--muted:#9aa0a6;--line:#2c3036;--accent:#7cc4ad;--code:#202328;--banner:#3a3220}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+.banner{background:var(--banner);border-bottom:1px solid var(--line);padding:8px 16px;font-size:13px;color:var(--muted)}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px;display:grid;grid-template-columns:220px 1fr;gap:32px}
+nav{position:sticky;top:16px;align-self:start;font-size:14px}
+nav a{display:block;color:var(--muted);text-decoration:none;padding:2px 0}
+nav a:hover{color:var(--accent)}
+main{min-width:0}
+h1{font-size:28px;margin:0 0 8px}h2{font-size:21px;margin-top:36px;border-bottom:1px solid var(--line);padding-bottom:4px}h3{font-size:17px;margin-top:24px}
+a{color:var(--accent)}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:12px;border-radius:6px;overflow-x:auto}pre code{padding:0}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+th{background:var(--code)}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0}
+.group{border:1px solid var(--line);border-radius:8px;padding:10px}
+.group h4{margin:0 0 8px;font-size:14px;color:var(--accent)}
+.wi{border-left:3px solid var(--accent);padding:4px 8px;margin:6px 0;font-size:14px}
+.wi.done{opacity:.6;text-decoration:line-through}
+.wi small{display:block;color:var(--muted)}
+@media (max-width:760px){.wrap{grid-template-columns:1fr}nav{position:static}}
+</style>
+</head>
+<body>
+<div class="banner">Generated from <code>{{SOURCE_FILE}}</code> — edit the Markdown, not this file.</div>
+<div class="wrap">
+<nav>{{TOC}}</nav>
+<main>
+{{CONTENT}}
+</main>
+</div>
+</body>
+</html>
