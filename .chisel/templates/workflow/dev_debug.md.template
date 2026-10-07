@@ -1,0 +1,65 @@
+{{IF_CLAUDE}}
+---
+name: dev_debug
+description: Find and fix the root cause of a bug or failing test — reproduce, gather evidence, test one hypothesis at a time, fix, add a regression test, verify. Use for any BUG entry or unexpected behavior.
+---
+{{/IF_CLAUDE}}
+{{IF_COPILOT}}
+---
+description: Find and fix the root cause of a bug or failing test — reproduce, gather evidence, test one hypothesis at a time, fix, add a regression test, verify.
+mode: agent
+---
+{{/IF_COPILOT}}
+<!-- Adapted from superpowers by Jesse Vincent (MIT) -->
+
+You are executing `/dev_debug` — fix a bug by finding its cause first.
+
+## Iron rule
+
+**No fix before the root cause is identified with evidence.** A fix aimed at a symptom hides the bug and usually creates a second one. "Let me just try…" is a guess, not debugging.
+
+## Before starting
+
+Read `.docs/architecture.md` and the rules file ({{IF_CLAUDE}}`.claude/rules/rules.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/instructions/rules.instructions.md`{{/IF_COPILOT}}) — the test command and the relevant systems are there. If a `BUG` entry exists in `.docs/todo.md`, read it.
+
+## Steps
+
+### 1. Reproduce
+
+Get the exact steps or command that shows the bug, and run it yourself. Write down the expected and the actual result.
+If you can't reproduce it, don't guess: ask the user for the missing detail (input, environment, version, logs).
+
+### 2. Gather evidence
+
+- The full error text and stack trace — read them completely; the answer is often there.
+- Recent changes: `git log --oneline -15` and `git diff` on the files involved.
+- The actual data at the failure point (add a temporary log or assertion if needed — remove it afterwards).
+- Whether it fails always, sometimes, or only in one environment.
+
+### 3. Trace backwards
+
+Start at the symptom and follow the bad value back through its callers until you find where it first goes wrong. The place where the error appears is rarely the place where it starts.
+
+### 4. One hypothesis at a time
+
+State it explicitly: *"I think X happens because Y."* Test it with the smallest possible check. If it's wrong, discard it and form a new one from the evidence — never change two things at once.
+
+### 5. Fix the root cause
+
+Change the code where the problem starts, not where it shows. Keep the fix minimal — no unrelated refactoring in the same change.
+
+### 6. Regression test
+
+Where the project has tests, write a test that reproduces the bug, and confirm that it **fails without the fix** and passes with it. A regression test that never failed proves nothing.
+
+### 7. Verify
+
+Run the reproduction from step 1 and the related tests, and show the output. Remove any temporary logging.
+
+## Two-strike rule
+
+After **two** fixes that didn't work, stop. Don't stack a third. List what you assumed, what the evidence actually shows, and where they disagree — then decide the next step with the user. Repeated failed fixes mean a wrong assumption, not bad luck.
+
+## Housekeeping
+
+Follow the tier's housekeeping from the rules: move the `BUG` entry to `.docs/todo_done.md` with a one-line root-cause note, and update `.docs/` if the bug revealed something the docs got wrong.

@@ -1,0 +1,60 @@
+{{IF_CLAUDE}}
+---
+name: dev_tdd
+description: Test-first development — write a failing test, watch it fail, write the minimal code to pass, refactor. Use for any code change in a project with tests; /dev_execute tells agents to follow it.
+---
+{{/IF_CLAUDE}}
+{{IF_COPILOT}}
+---
+description: Test-first development — write a failing test, watch it fail, write the minimal code to pass, refactor.
+mode: agent
+---
+{{/IF_COPILOT}}
+<!-- Adapted from superpowers by Jesse Vincent (MIT) -->
+
+You are executing `/dev_tdd` — change code test-first.
+
+## Why
+
+A test written after the code passes immediately, so it never proves it can catch anything. Watching a test fail first is the only evidence that it tests the right thing.
+
+## Before starting
+
+1. Find the project's test command in the rules file ({{IF_CLAUDE}}`.claude/rules/rules.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/instructions/rules.instructions.md`{{/IF_COPILOT}}, Quick workflow → Test) and the existing tests for the area you're changing.
+2. **If the project has no test setup**, stop and propose setting one up first — as a Quick task, or as a Feature TASK if it's substantial (framework choice, CI). Continue only after it exists or the user explicitly says to skip TDD for this change.
+
+## The cycle
+
+### Red
+
+Write **one** test for **one** behavior, named after what the behavior should be (e.g. `rejects empty email`, not `test1`). Use the real code; mock only at system boundaries (network, clock, filesystem when unavoidable).
+
+Run it. It must **fail**, and fail for the expected reason (the behavior is missing) — not because of a typo or an import error.
+- It passes → it's testing existing behavior. Fix the test.
+- It errors → fix the error and run again until it fails correctly.
+
+### Green
+
+Write the **minimal** code that makes the test pass. No extra options, no "while I'm here" features.
+
+Run the test, then the related suite. Everything must pass, with clean output.
+- Your test fails → fix the code, not the test.
+- Another test fails → fix it now, before moving on.
+
+### Refactor
+
+Only with all tests green: remove duplication, improve names, extract helpers. Re-run after each change. Don't add behavior here.
+
+Then start the next Red for the next behavior.
+
+## Rules
+
+- No production code without a failing test first.
+- Never weaken, skip, or delete a test to make it pass.
+- Test behavior, not implementation details — a refactor shouldn't break good tests.
+- A bug fix starts with a test that reproduces the bug.
+- Report the real test output; never claim green without running it.
+
+## Exceptions
+
+Configuration, generated code, and pure documentation changes don't need a test first. Tell the user you're skipping TDD for this change and why.
