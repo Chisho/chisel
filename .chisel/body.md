@@ -1,4 +1,4 @@
-You are executing `/dev-chisel` — a project scaffolding tool that sets up configuration files tailored to the current project and the user's chosen AI coding assistant (Claude Code or GitHub Copilot). Templates live in `.chisel/templates/` (relative to the project root). The scaffolder is one-shot: by default, after successful setup it removes its own source so it doesn't pollute the target workspace.
+You are executing `/dev-chisel` — a project scaffolding tool that sets up configuration files tailored to the current project and the user's chosen AI coding assistant (Claude Code or GitHub Copilot). Templates live in `.chisel/templates/` (relative to the project root). The scaffolder is one-shot: after successful setup it always removes its own source so it doesn't pollute the target workspace.
 
 ## Phase 1: Explore the Project
 
@@ -14,26 +14,24 @@ Before asking anything, silently gather context. Do not assume what the project 
 5. Classify project maturity based on what you found:
    - **Greenfield** — no project manifest and little to no source code (empty repo, or only README/LICENSE). Architecture docs will need to be defined rather than discovered.
    - **Existing** — has a manifest and/or meaningful source code. Architecture docs can be filled from exploration.
+6. Detect the test setup (test directories, test scripts in the manifest, test framework config). Record the test command if found — it fills `{{TEST_INSTRUCTIONS}}` in the rules and the manual. If there is none, `{{TEST_INSTRUCTIONS}}` says so and points to `/dev_tdd`, which proposes setting tests up.
 
 ## Phase 2: Self-Cleanup Notice
 
-Before any other questions, surface this notice and record the user's answer for use in Phase 9:
+Before any other questions, show this notice and wait for acknowledgement:
 
 > **Heads-up — this scaffolder is one-shot.**
 >
-> By default, after successful setup `/dev-chisel` removes its own source from this project so it doesn't pollute the workspace:
-> - `.chisel/body.md` — the scaffolder instructions
-> - `.chisel/templates/` — the template library
+> When setup finishes, `/dev-chisel` **will** remove its own source from this project:
+> - `.chisel/` — the scaffolder instructions and template library
 > - `.claude/skills/dev-chisel/` — the Claude Code skill entry
 > - `.github/prompts/dev-chisel.prompt.md` — the Copilot prompt entry
 >
-> Everything generated this run stays: `CLAUDE.md` / `copilot-instructions.md`, rules, agents / chat modes, `.docs/`, and the driver-mode toggle skills (`/dev_mainseat`, `/dev_backseat`).
+> Everything generated stays: the instruction index, rules, agents / chat modes, the workflow and driver-mode commands, and `.docs/`. You will **not** be able to run `/dev-chisel` again in this project without reinstalling it.
 >
-> Re-running `/dev-chisel` later would require reinstalling the scaffolder source.
->
-> **Run self-cleanup at the end?** (Y / n — answer "n" to keep the scaffolder source, e.g. for iterative testing or future re-runs in this project)
+> **Type "ok" to acknowledge and continue.**
 
-Default is yes. Record the answer and continue to Phase 3 regardless of which they pick. The recorded preference is honored in Phase 9.
+If the user does not acknowledge, stop the run without creating any files. Cleanup is not optional — it runs in Phase 8.
 
 ## Phase 3: Pick Target Tool
 
@@ -54,12 +52,12 @@ Present what you found:
 > **Project state:** [greenfield / existing]
 > **Target tool:** [Claude Code / Copilot]
 > **Existing setup:** [none / partial / full — list what exists in the relevant dirs]
-> **Self-cleanup at end:** [yes / no]
+> **Self-cleanup at end:** yes (acknowledged)
 
 Then ask:
 
 > **What would you like to do?**
-> 1. **Full setup** — Create the complete configuration (instructions, rules, agents/chat modes, .docs)
+> 1. **Full setup** — Create the complete configuration (instructions, rules, agents/chat modes, workflow commands, .docs)
 > 2. **Partial setup** — Choose which pieces to create
 > 3. **Add agents / chat modes** — Add specific ones to an existing setup
 > 4. **Modify existing** — Update or extend files that already exist
@@ -75,6 +73,8 @@ If ANY target file already exists:
    - **Backup + Overwrite** — Rename existing files with `.old` extension, then create new ones (e.g., `CLAUDE.md` → `CLAUDE.md.old`)
 
 NEVER overwrite without explicit permission. This is a hard rule.
+
+`.docs/todo.md` and `.docs/todo_done.md` with existing entries are never replaced wholesale in **Modify existing** mode: add the new Convention lines and keep every entry and tally as-is.
 
 ## Phase 6: Configure
 
@@ -95,13 +95,19 @@ List every `*.md.template` in `.chisel/templates/agents/` and present each as a 
 - **embedded-developer** — firmware, drivers, RTOS, hardware integration
 - **security-expert** *(read-only)* — threat modeling, vulnerability analysis, secure-coding review
 
-Ask: *"Which would you like? You can also describe a custom one and I'll create it."*
+**`code-reviewer` is always included** — the Feature flow's `/dev_execute` uses it to review every work item. Show it as *included*, not as an option.
+
+Ask: *"`code-reviewer` is always included. Which others would you like? You can also describe a custom one and I'll create it."*
 
 Agents fall into two groups:
 - **Code-modifying** (frontend-developer, backend-developer, embedded-developer) — tools include `Edit` and `Write`; the agent can make changes directly. These agents honor driver-mode by checking their task prompt for a *"mainseat"* directive: in **backseat** (default — no directive) they edit files directly; if the main session passes a mainseat directive, they walk the user through ready-to-paste snippets instead. Toggle the conversation's mode with `/dev_mainseat` and `/dev_backseat`.
 - **Read-only** (architect, code-reviewer, security-expert) — tools are `Read, Grep, Glob, Bash` only. The agent plans, reviews, or recommends; the user applies changes. Driver-mode does not apply (these agents can't edit anyway).
 
 For user-added templates not named above, infer the group from the template's `tools:` frontmatter — templates whose tools include `Edit`/`Write` are code-modifying (and get the driver-mode paragraph); otherwise treat them as read-only.
+
+### Workflow
+
+No question — the Direct / Quick / Feature workflow and all five workflow commands (`/dev_feature`, `/dev_plan`, `/dev_execute`, `/dev_debug`, `/dev_tdd`) are always generated.
 
 ### Project-Specific Rules
 
@@ -127,7 +133,13 @@ Using the templates from `.chisel/templates/` as starting points, generate all f
 - Real file paths and system names from the codebase
 - The target tool's file format and location conventions
 
-**Exception:** files under `.chisel/templates/driver-mode/` are static (no placeholders) — copy them verbatim to their destinations.
+**Exception — copied verbatim:** files under `.chisel/templates/driver-mode/`, and the three runtime templates `.chisel/templates/workflow/task-view.html.template`, `.chisel/templates/task/spec.md.template`, `.chisel/templates/task/plan.md.template`. Their `{{…}}` placeholders are filled later by the workflow commands, **not** now.
+
+### Workflow conditionals
+
+Templates may contain `{{IF_CLAUDE}}…{{/IF_CLAUDE}}`, `{{IF_COPILOT}}…{{/IF_COPILOT}}`, and `{{IF_GREENFIELD}}…{{/IF_GREENFIELD}}` blocks. Keep the content of blocks that apply to this run (target tool, project state), delete the others entirely, and always delete the markers themselves.
+
+Workflow command templates (`.chisel/templates/workflow/dev_*.md.template`) are **not** adapted beyond that: resolve only the `{{IF_…}}` blocks and copy the rest as-is. Their other `{{…}}` text (`{{TITLE}}`, `{{SOURCE_FILE}}`, `{{TOC}}`, `{{CONTENT}}`, `{{TODO: …}}`) is literal instruction text used when the commands run.
 
 **Important — `.chisel/` is scaffolder-internal, not project content.** Never describe `.chisel/`, `body.md`, the `dev-chisel` skill, or the templates folder as if they were the *project* in `CLAUDE.md` / `copilot-instructions.md`. They belong to the scaffolder, not the target project. When filling `{{PROJECT_DESCRIPTION}}` and `{{RUN_INSTRUCTIONS}}`:
 
@@ -141,6 +153,7 @@ Using the templates from `.chisel/templates/` as starting points, generate all f
 - **`.claude/rules/rules.md`** — Auto-loaded rules with workflow, conventions, and project-specific constraints. Based on `rules.md.template`. Must include the Driver-Mode section from the template — that's how the main session knows to honor mainseat / backseat for the conversation.
 - **`.claude/agents/*.md`** — One file per chosen agent, adapted from templates in `.chisel/templates/agents/`.
 - **`.claude/skills/dev_mainseat/SKILL.md`** + **`.claude/skills/dev_backseat/SKILL.md`** — Driver-mode toggle skill entry points. Copy verbatim from `.chisel/templates/driver-mode/dev_mainseat.SKILL.md` and `.chisel/templates/driver-mode/dev_backseat.SKILL.md`.
+- **`.claude/skills/<name>/SKILL.md`** for each of `dev_feature`, `dev_plan`, `dev_execute`, `dev_debug`, `dev_tdd` — workflow commands, from `.chisel/templates/workflow/<name>.md.template` (see *Workflow conditionals*).
 
 ### Files to generate — GitHub Copilot target
 
@@ -148,6 +161,7 @@ Using the templates from `.chisel/templates/` as starting points, generate all f
 - **`.github/instructions/rules.instructions.md`** — Instructions file. Adapt from `rules.md.template`. Must include the Driver-Mode section from the template.
 - **`.github/chatmodes/*.chatmode.md`** — One chat mode per chosen agent, adapted from `.chisel/templates/agents/` to Copilot's chat-mode format.
 - **`.github/prompts/dev_mainseat.prompt.md`** + **`.github/prompts/dev_backseat.prompt.md`** — Driver-mode toggle prompt entry points. Copy verbatim from `.chisel/templates/driver-mode/dev_mainseat.prompt.md` and `.chisel/templates/driver-mode/dev_backseat.prompt.md`.
+- **`.github/prompts/<name>.prompt.md`** for each of `dev_feature`, `dev_plan`, `dev_execute`, `dev_debug`, `dev_tdd` — workflow commands, from `.chisel/templates/workflow/<name>.md.template` (see *Workflow conditionals*).
 
 ### Files to generate — shared (either target)
 
@@ -157,47 +171,46 @@ Using the templates from `.chisel/templates/` as starting points, generate all f
 - **`.docs/todo.md`** — Task tracker with the user's chosen types and priority scale. Based on `todo.md.template`.
   - **Greenfield projects only:** seed the tracker with a top-priority kickoff task, for example: *"Define project scope and initial architecture — fill in `.docs/architecture.md`"*. This gives the next working session a concrete starting point.
 - **`.docs/todo_done.md`** — Empty completed task archive. Based on `todo_done.md.template`.
+- **`.docs/tasks/.gitkeep`** + **`.docs/tasks/done/.gitkeep`** — empty files so the TASK folders exist in git.
+- **`.docs/templates/task-view.html`**, **`.docs/templates/spec.md`**, **`.docs/templates/plan.md`** — copied verbatim from `.chisel/templates/workflow/task-view.html.template`, `.chisel/templates/task/spec.md.template`, `.chisel/templates/task/plan.md.template`. The workflow commands read them at runtime (`.chisel/` is gone by then).
+- **`.docs/manual.md`** — the user manual, from `manual.md.template`. Fill `{{PROJECT_NAME}}`, `{{AGENTS_TABLE}}` (one row per generated agent: name · what it's for · edits code?), `{{TEST_INSTRUCTIONS}}` (same value as in the rules), and resolve its `{{IF_…}}` blocks (`{{IF_GREENFIELD}}` is kept only for greenfield projects).
+- **`.docs/manual.html`** — render `.docs/manual.md` into `.docs/templates/task-view.html` the same way the workflow commands do (see the *Render & open* section of `.chisel/templates/workflow/dev_feature.md.template`): fill `{{TITLE}}`, `{{SOURCE_FILE}}`, `{{TOC}}`, `{{CONTENT}}`. Render only — it is opened in Phase 9.
 
-## Phase 8: Summary
+## Phase 8: Self-Cleanup
 
-After generating, show the user:
-- List of all files created (with paths)
-- List of all files backed up (if any)
-- Quick explanation of what each file does
-- If the project is greenfield, point out the seeded kickoff task in `.docs/todo.md` as the concrete next step — defining the project is the first real piece of work
-- Surface the driver-mode toggles: `/dev_mainseat` flips the conversation to "user drives, agent provides snippets" mode; `/dev_backseat` reverts to the default "agent edits, user reviews". Note that mode is conversation-scoped — every new conversation starts in backseat.
-- State whether self-cleanup is about to run (per the Phase 2 answer):
-  - **Yes** → "About to remove the scaffolder source. Re-running `/dev-chisel` later requires reinstalling it."
-  - **No** → "Self-cleanup skipped — scaffolder source is preserved for re-runs. Run `/dev-chisel` again later to add agents / chat modes or modify the setup."
+Always runs (acknowledged in Phase 2). Use a single platform-appropriate command (e.g. `rm -rf` on Unix-like shells) to delete:
 
-## Phase 9: Self-Cleanup
-
-If the user answered **yes** in Phase 2, perform the cleanup now. Use a single platform-appropriate command (e.g. `rm -rf` on Unix-like shells) to delete:
-
-- `.chisel/body.md`
-- `.chisel/templates/` (the entire directory and its contents)
+- `.chisel/` (the entire directory — `body.md` and `templates/`)
 - `.claude/skills/dev-chisel/` (the entire directory)
 - `.github/prompts/dev-chisel.prompt.md`
 
-Since `.chisel/` contains nothing else after this run (no state file, no body files), `.chisel/` itself becomes empty and may be removed too.
-
-After deletion, verify the listed paths no longer exist and report briefly to the user (e.g. *"Scaffolder source removed. The toggle skills, generated config, and `.docs/` remain."*).
+After deletion, verify the listed paths no longer exist.
 
 **Do NOT delete:**
-- `.claude/skills/dev_mainseat/`, `.claude/skills/dev_backseat/` — toggle skill entry points (Claude Code target)
-- `.github/prompts/dev_mainseat.prompt.md`, `.github/prompts/dev_backseat.prompt.md` — toggle prompt entry points (Copilot target)
-- Any other generated artifact (`CLAUDE.md`, agents, rules, `.docs/`, etc.)
+- `.claude/skills/dev_mainseat/`, `.claude/skills/dev_backseat/` and `.claude/skills/dev_{feature,plan,execute,debug,tdd}/` (Claude Code target)
+- `.github/prompts/dev_mainseat.prompt.md`, `.github/prompts/dev_backseat.prompt.md` and `.github/prompts/dev_{feature,plan,execute,debug,tdd}.prompt.md` (Copilot target)
+- `.docs/` — including `.docs/templates/`, `.docs/tasks/`, `.docs/manual.md`, `.docs/manual.html`
+- Any other generated artifact (`CLAUDE.md`, agents, rules, etc.)
 
-If the user answered **no** in Phase 2, this phase is skipped — leave the scaffolder source intact.
+## Phase 9: Explain the System
+
+1. Open `.docs/manual.html`: Windows `start "" "<path>"`, macOS `open "<path>"`, Linux `xdg-open "<path>"`. If that fails or there is no desktop, print the absolute path.
+2. In chat, keep it short and loose — a few lines, no file-by-file walkthrough:
+   - What was set up, one line per area: instructions, rules, agents, workflow commands, `.docs/`. Mention any files backed up (`.old`).
+   - How to work: *"Just ask — I'll pick Direct, Quick, or Feature. For a feature I'll ask first."*
+   - **Greenfield:** the kickoff TASK in `.docs/todo.md` is the first step — run `/dev_feature` on it.
+   - *"Everything else is in the manual that just opened (`.docs/manual.md`)."*
+3. Confirm the scaffolder source was removed (*"Scaffolder source removed — `/dev-chisel` is gone; everything generated stays."*).
 
 ## Important Rules
 
-- **Phase 2 confirmation runs before any generation** — record the user's self-cleanup preference, but proceed with the rest of the scaffolder regardless of which they pick.
+- **Phase 2 acknowledgement is required before anything else** — no acknowledgement, no run. Cleanup always runs in Phase 8.
 - **Read templates from `.chisel/templates/`** — don't hallucinate template content, actually read the files
 - **Adapt templates to the target tool's conventions** — Copilot and Claude Code have different file formats and directory conventions; don't mix them
 - **Never overwrite without permission** — always ask first
-- **Adapt, don't copy** — templates are starting points, everything must be tailored. **Exception:** files under `.chisel/templates/driver-mode/` are static — copy verbatim.
+- **Adapt, don't copy** — templates are starting points, everything must be tailored. **Exceptions:** driver-mode files and the three `.docs/templates/` files are copied verbatim; workflow command templates only get their `{{IF_…}}` blocks resolved.
 - **Don't prescribe project type** — offer possibilities, let the user define what the project is
 - **Architecture doc must contain real information** — explore the codebase and document what you actually find, don't leave placeholders
 - **Keep the index concise** — `CLAUDE.md` / `copilot-instructions.md` are indexes, not manuals. Detailed info goes in `.docs/`
-- **Generated `rules.md` / `rules.instructions.md` MUST include the Driver-Mode section** from the template — without it the main session won't know to honor mainseat / backseat.
+- **Generated `rules.md` / `rules.instructions.md` MUST include the Driver-Mode section and the four `Workflow —` sections** (Triage, Direct, Quick, Feature) from the template — without them the main session won't know the driver-mode or how to triage requests.
+- **Never leave `{{IF_…}}` markers in generated files.**
