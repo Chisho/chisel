@@ -1,6 +1,6 @@
 # Chisel
 
-**AI scaffolding for any codebase.** Chisel is a one-shot scaffolder that onboards an AI coding assistant — [Claude Code](https://claude.com/claude-code) or [GitHub Copilot](https://github.com/features/copilot) — to your project. Run one slash command, answer a few questions, and Chisel generates a tailored configuration: project instructions, workflow rules, specialized agents, a task tracker, and living architecture docs — all adapted to your actual tech stack.
+**AI scaffolding for any codebase.** Chisel is a one-shot scaffolder that onboards an AI coding assistant — [Claude Code](https://claude.com/claude-code) or [GitHub Copilot](https://github.com/features/copilot) — to your project. Run one slash command, answer a few questions, and Chisel generates a tailored configuration: project instructions, workflow rules, specialized agents, a feature workflow (brainstorm → spec → plan → parallel execution), a task tracker, and living architecture docs — all adapted to your actual tech stack.
 
 Think of it as onboarding a new teammate. Instead of an AI assistant guessing at your conventions on every task, it starts with the context, rules, and roles you'd give a human developer.
 
@@ -15,11 +15,13 @@ Think of it as onboarding a new teammate. Instead of an AI assistant guessing at
 - [Works on any project — empty or existing](#works-on-any-project--empty-or-existing)
 - [What gets generated](#what-gets-generated)
 - [Specialized agents / chat modes](#specialized-agents--chat-modes)
+- [Workflow: Direct, Quick, Feature](#workflow-direct-quick-feature)
 - [Driver mode: mainseat vs. backseat](#driver-mode-mainseat-vs-backseat)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Design principles](#design-principles)
 - [Repository layout](#repository-layout)
+- [Acknowledgements](#acknowledgements)
 - [License](#license)
 
 ---
@@ -45,7 +47,7 @@ Chisel deliberately avoids dumping your entire project into context on every mes
 
 ## How it works
 
-Chisel is **pure Markdown** — no CLI, no package to install, no runtime dependencies, nothing of its own to execute. It ships as a slash command / prompt plus a template library: you copy a few files into your repo, run it once, and it self-cleans afterward — leaving behind only the generated config. The entire run happens inside your assistant, so your code goes only where Claude Code or Copilot already sends it.
+Chisel is **pure Markdown** — no CLI, no package to install, no runtime dependencies, nothing of its own to execute. It ships as a slash command / prompt plus a template library: you copy a few files into your repo, run it once, and it always self-cleans afterward — leaving behind only the generated config. The entire run happens inside your assistant, so your code goes only where Claude Code or Copilot already sends it.
 
 ```
 /dev-chisel
@@ -57,15 +59,15 @@ Under the hood, a single instruction file (`.chisel/body.md`) drives both the Cl
 
 ### The run, phase by phase
 
-1. **Explore** — reads your manifest (`package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, …), git history, and directory layout. Records only what it can confirm; nothing is assumed. Classifies the project as **greenfield** (little/no code — architecture to be defined) or **existing** (architecture to be discovered).
-2. **Self-cleanup notice** — tells you up front that the scaffolder removes its own source after a successful run, and lets you opt out.
+1. **Explore** — reads your manifest (`package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, …), git history, directory layout, and test setup. Records only what it can confirm; nothing is assumed. Classifies the project as **greenfield** (little/no code — architecture to be defined) or **existing** (architecture to be discovered).
+2. **Self-cleanup notice** — tells you up front that the scaffolder will remove its own source at the end, and asks you to acknowledge it. No acknowledgement, no run.
 3. **Pick target tool** — Claude Code (`.claude/`) or GitHub Copilot (`.github/`). Chisel suggests a default if it detects an existing setup.
 4. **Ask what you want** — full setup, partial setup, add agents, or modify an existing config.
-5. **Handle existing files** — if anything would be overwritten, Chisel asks first (skip / overwrite / back-up-and-overwrite). **It never overwrites without permission.**
-6. **Configure** — you choose task types & priority scheme, which agents/chat modes to include, project-specific rules, and whether the project is pre-production.
-7. **Generate** — writes the files, adapting every template to your real stack, paths, and choices. Templates are starting points, not copied verbatim — the one exception is the placeholder-free driver-mode toggle files, which are static and copied as-is.
-8. **Summary** — lists everything created, explains each file, and surfaces next steps.
-9. **Self-cleanup** — removes the scaffolder source (unless you opted out), leaving a clean workspace.
+5. **Handle existing files** — if anything would be overwritten, Chisel asks first (skip / overwrite / back-up-and-overwrite). **It never overwrites without permission**, and an existing todo list keeps every entry.
+6. **Configure** — you choose task types & priority scheme, which agents/chat modes to add (`code-reviewer` is always included), project-specific rules, and whether the project is pre-production. The workflow itself is always included.
+7. **Generate** — writes the files, adapting every template to your real stack, paths, and choices. Templates are starting points, not copied verbatim — the exceptions are the driver-mode toggles and the spec / plan / HTML-view formats, which are copied as-is.
+8. **Self-cleanup** — removes the scaffolder source, leaving a clean workspace.
+9. **Explain the system** — opens a short user manual (`.docs/manual.html`) and sums up how to work in a few lines.
 
 ---
 
@@ -92,13 +94,22 @@ Either way you get the same file set; only the content differs — a form to fil
 ├── agents/                    # One file per chosen specialized agent
 │   └── *.md
 └── skills/
+    ├── dev_feature/           # Workflow commands (see Workflow below)
+    ├── dev_plan/
+    ├── dev_execute/
+    ├── dev_debug/
+    ├── dev_tdd/
     ├── dev_mainseat/          # Driver-mode toggle (see below)
     └── dev_backseat/
 
 .docs/
+├── manual.md / manual.html    # Short user manual for this setup
 ├── architecture.md            # Project structure, key systems, data flow
 ├── todo.md                    # Task tracker (your types + priority scheme)
-└── todo_done.md               # Completed-task archive
+├── todo_done.md               # Completed-task archive
+├── tasks/                     # One folder per feature TASK (spec, plan, HTML views)
+│   └── done/                  # Finished TASKs
+└── templates/                 # Spec / plan / HTML-view formats used by the workflow
 ```
 
 ### GitHub Copilot target
@@ -111,13 +122,18 @@ Either way you get the same file set; only the content differs — a form to fil
 ├── chatmodes/                 # One chat mode per chosen agent
 │   └── *.chatmode.md
 └── prompts/
+    ├── dev_feature.prompt.md   # Workflow commands
+    ├── dev_plan.prompt.md
+    ├── dev_execute.prompt.md
+    ├── dev_debug.prompt.md
+    ├── dev_tdd.prompt.md
     ├── dev_mainseat.prompt.md  # Driver-mode toggles
     └── dev_backseat.prompt.md
 
 .docs/                         # Same tool-agnostic docs as above
 ```
 
-The `.docs/` folder is identical either way — architecture, todo, and done-archive are tool-agnostic.
+The `.docs/` folder is identical either way — architecture, todo, TASK folders, and the manual are tool-agnostic.
 
 ### `.docs/` is your living source of truth
 
@@ -136,13 +152,46 @@ Each agent becomes a Claude Code subagent or a Copilot chat mode. **The set belo
 | Agent                        | Role                                                          | Access    |
 | ---------------------------- | ------------------------------------------------------------- | --------- |
 | **architect**          | System design, project structure, technical decisions         | Read-only |
-| **code-reviewer**      | Code quality, correctness, best practices                     | Read-only |
+| **code-reviewer**      | Code quality, correctness, best practices — **always included** | Read-only |
 | **security-expert**    | Threat modeling, vulnerability analysis, secure-coding review | Read-only |
 | **frontend-developer** | UI implementation, styling, UX                                | Can edit  |
 | **backend-developer**  | Server logic, database, APIs                                  | Can edit  |
 | **embedded-developer** | Firmware, drivers, RTOS, hardware integration                 | Can edit  |
 
 **Rolling your own:** agent templates live in `.chisel/templates/agents/` as `{{PLACEHOLDER}}`-driven Markdown. Add a new `.md.template` there and it's available to future runs; or just ask for a custom role during a run and Chisel writes it inline. Read-only agents get `Read, Grep, Glob, Bash`; code-modifying agents also get `Edit`/`Write` and honor driver mode.
+
+---
+
+## Workflow: Direct, Quick, Feature
+
+Chisel's workflow scales with the size of the request. Before acting, the assistant triages every request with two questions:
+
+1. **Does any feature signal fire?** — a new feature or capability; spans several subsystems or ~5+ files; open design decisions; naturally splits into independent pieces. If yes, it *proposes* the Feature flow in one line and waits for you.
+2. **Do all direct conditions hold?** — a localized change, exactly specified, no design choice, no new dependency. If yes, Direct.
+
+Otherwise it's Quick.
+
+| Tier | For | What happens |
+|---|---|---|
+| **Direct** | *"Sort this list in `parse_rows`"* | Change → verify → one-line report. No plan, no approval, no todo entry. |
+| **Quick** | Small tasks and bugs | Explore → plan in chat → approve → implement → test → housekeeping. |
+| **Feature** | New features, multi-part work | `/dev_feature` → `/dev_plan` → `/dev_execute`, tracked as a TASK. |
+
+When unsure, the assistant picks the heavier tier, and escalation only goes up. You can always override: *"just do it"* or `/dev_feature`.
+
+### The Feature flow
+
+- **`/dev_feature`** — brainstorms with you one question at a time, proposes approaches, and writes `spec.md` into `.docs/tasks/TASK-NNN-<slug>/`.
+- **`/dev_plan`** — splits the spec into work items, each with an agent, dependencies, exact files, and a *done when* check, grouped so items in a group never touch the same file and can run in parallel.
+- **`/dev_execute`** — dispatches each group to the agents (in parallel where the tool supports it), has `code-reviewer` check every item, tracks progress in `todo.md`, verifies the acceptance criteria, and closes the TASK. It's resumable from the first unfinished item.
+
+Each step waits for your approval and offers the next. The TASK's line in `todo.md` shows its status (`brainstorming` → `specced` → `planned` → `in-progress n/m` → `done`) and links to its folder; small entries stay one-liners.
+
+**Readable specs.** Markdown is the source of truth, but every spec and plan is also rendered to a self-contained HTML page (`spec.html`, `plan.html` — light/dark, table of contents, plan laid out by parallel group) and opened in your browser for review. No scripts or build step — the assistant renders it.
+
+**Discipline commands**, usable in any tier: **`/dev_debug`** (root cause before fix, regression test, two-strike rule) and **`/dev_tdd`** (red → green → refactor; proposes setting up tests if the project has none).
+
+The workflow is generated into your project — it doesn't depend on any plugin, so Claude Code and Copilot get the same thing.
 
 ---
 
@@ -186,7 +235,7 @@ The brace expansion is bash/zsh syntax — on Windows, run it from Git Bash (bun
 
 Then open the project in your assistant and run `/dev-chisel`.
 
-Because Chisel self-cleans after a successful run, the scaffolder source disappears from the target project once it's done its job — no clutter left behind. Re-running later just means re-installing these files.
+Because Chisel always self-cleans after a successful run (you acknowledge this at the start), the scaffolder source disappears from the target project once it's done its job — no clutter left behind. Re-running later just means re-installing these files.
 
 ---
 
@@ -194,8 +243,8 @@ Because Chisel self-cleans after a successful run, the scaffolder source disappe
 
 1. Install the scaffolder source into your project (above).
 2. Run **`/dev-chisel`** in Claude Code or GitHub Copilot.
-3. Answer the prompts (target tool, task types, agents, rules, pre-production status, self-cleanup).
-4. Review the generated `CLAUDE.md` / `copilot-instructions.md`, `rules`, agents, and `.docs/`.
+3. Acknowledge the self-cleanup notice, then answer the prompts (target tool, task types, agents, rules, pre-production status).
+4. Read the manual that opens at the end (`.docs/manual.html`), and review the generated `CLAUDE.md` / `copilot-instructions.md`, `rules`, agents, and `.docs/`.
 5. Start working — your assistant now has full project context.
 
 Works the same on an empty repo or an established codebase — see [Works on any project](#works-on-any-project--empty-or-existing) for how the generated content differs between the two.
@@ -208,7 +257,8 @@ Works the same on an empty repo or an established codebase — see [Works on any
 - **Confirm, don't assume** — Chisel records only what it can verify from your files, and never overwrites without asking.
 - **Adapt, don't template-dump** — generated files are tailored to your real stack, paths, and choices.
 - **Index, not manual** — `CLAUDE.md` / `copilot-instructions.md` stay lean pointers; detail lives in `.docs/`.
-- **Clean up after itself** — one-shot by default, leaving only the config you'll actually use.
+- **Clean up after itself** — always one-shot; you acknowledge it up front, and only the config you'll actually use is left behind.
+- **Gates where they matter** — trivial changes just happen; features get a spec and a plan you approve.
 
 ---
 
@@ -223,13 +273,22 @@ Works the same on an empty repo or an established codebase — see [Works on any
     ├── architecture.md.template
     ├── todo.md.template
     ├── todo_done.md.template
+    ├── manual.md.template     # user manual
     ├── agents/                # agent / chat-mode templates
+    ├── workflow/              # dev_feature / plan / execute / debug / tdd + HTML view
+    ├── task/                  # spec / plan formats for TASK folders
     └── driver-mode/           # static mainseat / backseat toggle files
 .claude/
 └── skills/dev-chisel/         # Claude Code skill entry point
 .github/
 └── prompts/dev-chisel.prompt.md   # GitHub Copilot prompt entry point
 ```
+
+---
+
+## Acknowledgements
+
+The workflow commands are adapted from [superpowers](https://github.com/obra/superpowers) by Jesse Vincent (MIT), rewritten to be token-light, integrated with Chisel's `.docs/` task system, and generated for both Claude Code and GitHub Copilot.
 
 ---
 
