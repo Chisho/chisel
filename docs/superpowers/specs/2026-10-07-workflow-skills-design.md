@@ -25,7 +25,7 @@ The workflow is integrated with Chisel's `.docs/` todo system: feature-sized TAS
 | D3 | Three workflow tiers: Direct / Quick / Feature | Gates only where they add value; avoids rubber-stamp approvals |
 | D4 | Triage is rule-based and *proposes* the Feature flow; user confirms or overrides | Avoids superpowers-style over-triggering; works on Copilot (no hooks) because the rule lives in the always-loaded rules file |
 | D5 | Markdown is the source of truth; HTML is a generated, auto-opened view (spec, plan, manual) | Cheap for agents, readable for humans, no drift |
-| D6 | Feature flow is always generated (no opt-in); only `dev_tdd` is conditional on a test setup | One consistent system; TDD without tests is noise |
+| D6 | Everything is enforced except the agent choice: all workflow skills (incl. `dev_tdd`) are always generated, and `code-reviewer` is always included. The user only chooses which other agents to add | One consistent system; the feature flow depends on the reviewer |
 | D7 | Self-cleanup is mandatory; Phase 2 becomes an acknowledgement, not a yes/no | One-shot scaffolder; user explicitly acknowledges losing `/dev-chisel` |
 | D8 | New final phase explains the system loosely and opens a generated user manual | Onboarding the user, not just the assistant |
 | D9 | One template per skill with `{{IF_CLAUDE}}` / `{{IF_COPILOT}}` blocks | Skills are long; two static copies (driver-mode style) would drift |
@@ -58,8 +58,8 @@ Workflow templates contain `{{IF_CLAUDE}}…{{/IF_CLAUDE}}` and `{{IF_COPILOT}}�
 ### 4.2 Generated layout (in the target project)
 
 ```
-Claude:   .claude/skills/{dev_feature,dev_plan,dev_execute,dev_debug[,dev_tdd]}/SKILL.md
-Copilot:  .github/prompts/{dev_feature,dev_plan,dev_execute,dev_debug[,dev_tdd]}.prompt.md
+Claude:   .claude/skills/{dev_feature,dev_plan,dev_execute,dev_debug,dev_tdd}/SKILL.md
+Copilot:  .github/prompts/{dev_feature,dev_plan,dev_execute,dev_debug,dev_tdd}.prompt.md
 
 .docs/
 ├── manual.md  manual.html          # user manual
@@ -77,10 +77,10 @@ Existing generated files (instruction index, rules, agents/chat modes, driver-mo
 
 | # | Phase | Change |
 |---|---|---|
-| 1 | Explore | Also detect test setup (test dirs, test scripts in manifest, test frameworks) — feeds `dev_tdd` decision |
+| 1 | Explore | Also detect test setup (test dirs, test scripts in manifest, test frameworks) — used to fill `{{TEST_INSTRUCTIONS}}` and the manual |
 | 2 | Cleanup notice | Becomes a mandatory acknowledgement: cleanup **will** run; user loses `/dev-chisel` unless reinstalled. No acknowledgement → stop the run |
 | 3–5 | Target, scope, existing files | Unchanged |
-| 6 | Configure | No workflow question (the workflow is always generated). If no test setup was detected, ask whether one is planned; include `dev_tdd` only if detected or planned |
+| 6 | Configure | No workflow or skill questions — the workflow is always generated. Agent selection: `code-reviewer` is always included (shown as included, not offered); the user chooses any additional agents. Task types, project rules, and pre-production questions are unchanged |
 | 7 | Generate | + workflow skills, `.docs/tasks/` (with `done/`), `manual.md` + `manual.html`; updated rules/todo/index |
 | 8 | Self-cleanup | Moved here (was 9); always runs. Must not delete generated workflow skills/prompts |
 | 9 | Explain the system | NEW. Open `manual.html`; give a short in-chat summary (what was set up, how to start, where the manual is) |
@@ -156,7 +156,7 @@ Target length: ~80–150 lines each. Every skill first reads `.docs/architecture
 **`dev_plan`** — read spec → derive work items with agent, deps, files, done-when → assign parallel groups and check file overlap within each group → check every acceptance criterion is covered → render + open plan.html → wait for approval → status `planned` → offer `dev_execute`.
 
 **`dev_execute`** —
-- For each group in order: dispatch each WI to its agent with the WI text, spec, and driver-mode directive (and "use dev_tdd" if present). Parallel where the tool supports it; sequential otherwise.
+- For each group in order: dispatch each WI to its agent with the WI text, spec, and driver-mode directive and the instruction to follow `dev_tdd` for code changes. Parallel where the tool supports it; sequential otherwise.
 - After each WI: `code-reviewer` checks it against "Done when". On fail: one rework round; second fail → stop and report.
 - On pass: tick WI in plan.md, update `n/m` in todo.md, regenerate plan.html.
 - After all groups: verify acceptance criteria with real output; update `.docs/`; ask user to confirm; close (see lifecycle).
@@ -165,7 +165,7 @@ Target length: ~80–150 lines each. Every skill first reads `.docs/architecture
 
 **`dev_debug`** — reproduce → gather evidence → hypothesis → smallest test of hypothesis → fix root cause → regression test where possible → verify. After 2 failed fix attempts, stop and re-examine assumptions with the user instead of stacking fixes.
 
-**`dev_tdd`** (conditional) — red → green → refactor. A test must be seen failing before the implementation is written.
+**`dev_tdd`** (always generated) — red → green → refactor. A test must be seen failing before the implementation is written. If the project has no test setup yet, the skill stops and proposes setting one up (as a Quick task, or a Feature TASK if substantial) before continuing.
 
 ### 4.7 HTML views
 
@@ -184,13 +184,11 @@ Target length: ~80–150 lines each. Every skill first reads `.docs/architecture
 | Reviewer | `code-reviewer` agent | `code-reviewer` chat-mode instructions applied in-session |
 | Triage | rules.md (auto-loaded) | rules.instructions.md (auto-loaded) |
 
-If the user didn't choose the `code-reviewer` agent, `dev_execute` performs the review step itself using the same checklist.
-
 ### 4.9 User manual
 
 `manual.md` (+ `manual.html`), generated per project, plain language, short:
 - Day-to-day usage: just ask; how triage picks Direct / Quick / Feature and when it will ask you
-- Commands: `/dev_feature`, `/dev_plan`, `/dev_execute`, `/dev_debug`, `/dev_tdd` (if present), `/dev_mainseat`, `/dev_backseat`
+- Commands: `/dev_feature`, `/dev_plan`, `/dev_execute`, `/dev_debug`, `/dev_tdd`, `/dev_mainseat`, `/dev_backseat`
 - The chosen agents and what they're for
 - Where things live in `.docs/` and how TASK folders work
 - Greenfield: point to the seeded kickoff task
@@ -218,16 +216,16 @@ Lives in `.docs/` so the assistant can also read it on demand.
 | Scenario | Target | Checks |
 |---|---|---|
 | Empty repo | Claude | All files generated; `{{TODO}}` in architecture/manual; kickoff TASK seeded; cleanup runs; manual opens |
-| Small existing project with tests | Claude | `dev_tdd` present; triage → Direct ("sort this list"), Quick (small bug), Feature proposal ("add auth") |
+| Small existing project with tests | Claude | triage → Direct ("sort this list"), Quick (small bug), Feature proposal ("add auth") |
 | Same project | Copilot | Prompts generated; feature flow runs end-to-end (sequential fallback OK) |
-| Existing project without tests | either | No `dev_tdd`; manual and rules don't reference it |
+| Existing project without tests | either | `dev_tdd` present; invoking it proposes setting up tests first |
 | Interrupted `dev_execute` | Claude | Re-run resumes at first unticked WI |
 
 **Cross-cutting checks:** no leftover `{{…}}` placeholders except intentional `{{TODO: …}}` in greenfield docs (grep); HTML views render in light and dark mode; todo statuses, `todo_done.md` move, and `tasks/done/` move are correct.
 
 ## 7. Acceptance criteria
 
-1. A fresh run on either target generates all workflow skills (with `dev_tdd` only when a test setup exists or is planned), `.docs/tasks/`, and `manual.md`/`manual.html`, without depending on any plugin.
+1. A fresh run on either target generates all five workflow skills, the `code-reviewer` agent plus the user-chosen agents, `.docs/tasks/`, and `manual.md`/`manual.html`, without depending on any plugin.
 2. Generated rules contain the triage rule, the three tiers, and the folded principles; the existing Driver-Mode section remains.
 3. A feature TASK can be taken from triage proposal through spec, plan, execution, and closure, with the todo entry and folder updated at each step.
 4. Spec, plan, and manual HTML views are generated from Markdown and opened automatically (path printed on failure).
