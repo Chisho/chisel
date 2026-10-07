@@ -1,0 +1,93 @@
+{{IF_CLAUDE}}
+---
+name: dev_feature
+description: Start a feature TASK — brainstorm with the user one question at a time, write spec.md, render spec.html, get approval. Use when triage proposes the Feature flow or the user asks for a feature.
+---
+{{/IF_CLAUDE}}
+{{IF_COPILOT}}
+---
+description: Start a feature TASK — brainstorm with the user one question at a time, write spec.md, render spec.html, get approval.
+mode: agent
+---
+{{/IF_COPILOT}}
+<!-- Adapted from superpowers by Jesse Vincent (MIT) -->
+
+You are executing `/dev_feature` — turn a feature idea into an approved spec. This is step 1 of the Feature flow: `/dev_feature` → `/dev_plan` → `/dev_execute`.
+
+## Before starting
+
+1. Read `.docs/architecture.md` and the rules file ({{IF_CLAUDE}}`.claude/rules/rules.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/instructions/rules.instructions.md`{{/IF_COPILOT}}).
+2. If the user named an existing TASK (number or folder), **resume it** instead of creating a new one: read its `spec.md` and continue from its status in `.docs/todo.md`.
+   - `brainstorming` → continue at step 2 below.
+   - `specced` or later → the spec is already approved; offer `/dev_plan` (or the next step) and stop.
+3. If any `.docs/` section this feature depends on still has a `{{TODO: …}}` marker, name it and ask the user to resolve it first.
+
+## Steps
+
+### 1. Create the TASK
+
+- **Number** — take the next TASK number from the tally in `.docs/todo.md`. Never restart numbering.
+- **Slug** — from the title: lowercase ASCII, words joined by `-`, other characters dropped, max 40 characters. Example: *"Import/Export (CSV & JSON)"* → `import-export-csv-json`.
+- **Folder** — create `.docs/tasks/TASK-NNN-<slug>/`. If that folder already exists, append `-2`, `-3`… until it is unique.
+- **Todo line** — add at the end of the TASK section, then increment the tally:
+  `` - **TASK-NNN** [<priority>] <title> — `brainstorming` → .docs/tasks/TASK-NNN-<slug>/ ``
+  Ask for the priority if the user didn't give one.
+
+### 2. Explore
+
+Read only the code and docs this feature touches: entry points, the modules it extends, existing patterns for similar features. {{IF_CLAUDE}}If an `architect` agent exists, you may delegate a broad exploration to it.{{/IF_CLAUDE}}{{IF_COPILOT}}Explore in this session.{{/IF_COPILOT}} Note what you find — it becomes the spec's Context section.
+
+### 3. Ask
+
+- **One question per message.** Never stack questions.
+- Prefer multiple choice. Put your recommended option first and say why in one line.
+- Cover, in roughly this order: purpose (what problem, for whom), constraints (tech, time, compatibility), success (how we'll know it works), scope edges (what it should *not* do).
+- Don't ask what the code already answers.
+- Stop asking when you could write checkable acceptance criteria.
+
+### 4. Propose approaches
+
+Present 2–3 approaches with their trade-offs. Lead with your recommendation and the reason. Apply YAGNI — cut features the user didn't ask for. Wait for the user's pick.
+
+### 5. Write `spec.md`
+
+Copy `.docs/templates/spec.md` into the TASK folder and fill every section:
+
+- **Goal** — what it delivers and for whom.
+- **Context** — what exists today, with file paths.
+- **Decisions** — every choice the user made in steps 3–4, with the reason.
+- **Design** — components, data flow, interfaces, error handling.
+- **Out of scope** — what was deliberately left out.
+- **Acceptance criteria** — numbered, each one checkable by a command or an observable result.
+- **Open questions** — must be "None" before approval.
+
+### 6. Self-review
+
+Re-read the spec once with fresh eyes and fix problems inline:
+
+- No placeholders, "TBD", or vague requirements.
+- No section contradicts another; the Design delivers every acceptance criterion.
+- Anything that could be read two ways is made explicit.
+- **Scope** — if it's more than one coherent feature, propose splitting it into several TASKs and stop until the user decides.
+
+### 7. Render & open
+
+1. Read `.docs/templates/task-view.html` and the source `.md`.
+2. Convert the Markdown to HTML yourself: headings get `id`s (lowercase, hyphenated); tables → `<table>`; fenced code → `<pre><code>` with `<`, `>`, `&` escaped; checkboxes → `☐` / `☑`.
+3. Fill `{{TITLE}}` (the doc's H1), `{{SOURCE_FILE}}` (the .md path), `{{TOC}}` (one `<a href="#id">` per H2), `{{CONTENT}}`.
+4. Write the result next to the source with the same name and `.html` extension, replacing any previous version.
+5. Open it: Windows `start "" "<path>"`, macOS `open "<path>"`, Linux `xdg-open "<path>"`. If the command fails or there is no desktop (SSH, WSL without a browser, container), print the absolute path and continue — never stop the skill over this.
+
+### 8. Approval gate
+
+Ask: *"The spec is open in your browser (`spec.html`). Approve it, or tell me what to change."*
+
+- **Changes** → edit `spec.md`, re-run self-review, re-render, ask again.
+- **Approved** → set the todo status to `specced`, then offer: *"Spec approved. Run `/dev_plan` next?"*
+
+## Rules
+
+- One question per message.
+- Never write or change project code in this skill — it only writes `.docs/` files, so driver-mode does not apply.
+- Never set `specced` without the user's explicit approval.
+- `spec.md` is the source of truth. Never edit `spec.html` by hand; re-render it.
