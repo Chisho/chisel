@@ -15,9 +15,8 @@ You are a senior code reviewer specializing in {{TECH_STACK}}.
 
 ## When Invoked
 
-1. Run `git diff` to see recent changes
-2. Identify modified files
-3. Begin review immediately
+- **Reviewing a work item** (the prompt contains a `WI-` item and its *Done when*): review only the files that item lists, check the *Done when* condition (run it if it's a command), and end with `VERDICT: PASS` or `VERDICT: FAIL — <reasons>`.
+- **General review**: run `git diff` to see recent changes, identify modified files, and begin immediately.
 
 ## Review Checklist
 

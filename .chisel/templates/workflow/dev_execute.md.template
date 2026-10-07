@@ -1,0 +1,89 @@
+{{IF_CLAUDE}}
+---
+name: dev_execute
+description: Execute an approved TASK plan — dispatch work items to agents group by group, review each with code-reviewer, track progress, verify acceptance criteria, close the TASK. Resumable. Use after /dev_plan.
+---
+{{/IF_CLAUDE}}
+{{IF_COPILOT}}
+---
+description: Execute an approved TASK plan — dispatch work items to agents group by group, review each with code-reviewer, track progress, verify acceptance criteria, close the TASK. Resumable.
+mode: agent
+---
+{{/IF_COPILOT}}
+<!-- Adapted from superpowers by Jesse Vincent (MIT) -->
+
+You are executing `/dev_execute` — carry out an approved plan and close the TASK. This is step 3 of the Feature flow: `/dev_feature` → `/dev_plan` → `/dev_execute`.
+
+## Before starting
+
+1. Read `.docs/architecture.md` and the rules file ({{IF_CLAUDE}}`.claude/rules/rules.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/instructions/rules.instructions.md`{{/IF_COPILOT}}).
+2. **Find the TASK** — the one the user named, or the single TASK at `planned` / `in-progress` in `.docs/todo.md` (ask if there are several).
+3. **Check the status** — it must be `planned` or `in-progress n/m`. Otherwise name the missing step (`/dev_feature` or `/dev_plan`) and stop.
+4. Read the TASK's `spec.md` and `plan.md` in full.
+5. **Resume** — start from the first unticked work item. Items whose heading ends with ✅ are done; never redo them. Tell the user where you're resuming (e.g. *"Resuming at WI-4, group B — 3/7 done."*).
+6. Note the conversation's driver-mode (backseat unless `/dev_mainseat` was run).
+7. Set the todo status to `in-progress n/m` if it was `planned`.
+
+## For each group, in order
+
+### 1. Prepare
+
+Collect the group's unticked items. **Re-check file overlap now** — code may have moved since planning. If two items list the same file, or an item's file was changed by an unfinished item, run those items sequentially instead of in parallel.
+
+### 2. Dispatch
+
+Send each item to its agent with:
+
+- the full work item text (heading, Depends on, Files, Done when, steps);
+- the spec path, so the agent can read the design;
+- *"Follow `/dev_tdd` for code changes."*;
+- in mainseat, the directive *"Operate in mainseat mode — provide ready-to-paste snippets, do not call Edit/Write."*
+
+Items assigned to `main session` you implement yourself.
+
+{{IF_CLAUDE}}Launch the group's independent items in a single message with one Agent tool call per item so they run in parallel.{{/IF_CLAUDE}}{{IF_COPILOT}}If a subagent tool is available, use it for each item. Otherwise implement the items one by one in this session, following that agent's chat-mode instructions (`.github/chatmodes/<agent>.chatmode.md`).{{/IF_COPILOT}}
+
+### 3. Mainseat only
+
+The agent returns snippets; nothing is applied yet. Show them, then wait until the user says they applied them before reviewing that item.
+
+### 4. Review
+
+Review each finished item with `code-reviewer` in work-item mode: pass the work item and its *Done when*. The reviewer ends with `VERDICT: PASS` or `VERDICT: FAIL — <reasons>`.
+
+- **FAIL** → send the reasons back to the same agent for one rework round, then review again.
+- **Second FAIL** → stop. Report the item, the reviewer's reasons, and what you suggest. Don't improvise a fix outside the plan.
+
+### 5. Track
+
+On `PASS`:
+
+1. Tick the item's steps in `plan.md` and append ` ✅` to its heading.
+2. Update **Progress** in `plan.md` and `in-progress n/m` in `.docs/todo.md`.
+3. Re-render `plan.html` (see Render & open). Open the browser once per group, not after every item.
+
+When the whole group has passed, move to the next group.
+
+## Close the TASK
+
+1. **Verify** — run the check for every acceptance criterion in `spec.md` and show the output. No "should work" (see *Verify Before Claiming Done* in the rules).
+2. **Docs** — update `.docs/architecture.md` and any other `.docs/` file the change affects.
+3. **Confirm** — ask: *"All work items passed and the acceptance criteria are verified. Close TASK-NNN?"*
+4. **On yes** — set the status to `done`; move the todo line to `.docs/todo_done.md`; move the TASK folder to `.docs/tasks/done/`.
+
+## Render & open
+
+1. Read `.docs/templates/task-view.html` and the source `.md`.
+2. Convert the Markdown to HTML yourself: headings get `id`s (lowercase, hyphenated); tables → `<table>`; fenced code → `<pre><code>` with `<`, `>`, `&` escaped; checkboxes → `☐` / `☑`.
+3. Fill `{{TITLE}}` (the doc's H1), `{{SOURCE_FILE}}` (the .md path), `{{TOC}}` (one `<a href="#id">` per H2), `{{CONTENT}}`.
+4. Write the result next to the source with the same name and `.html` extension, replacing any previous version.
+5. Open it: Windows `start "" "<path>"`, macOS `open "<path>"`, Linux `xdg-open "<path>"`. If the command fails or there is no desktop (SSH, WSL without a browser, container), print the absolute path and continue — never stop the skill over this.
+
+Render the Groups section of `plan.html` as `<div class="groups">` with one `<div class="group">` per group and one `<div class="wi">` per item; add class `done` to items whose heading ends with ✅.
+
+## Rules
+
+- Never skip review, and never tick an item without `VERDICT: PASS`.
+- Never start a group before the previous group has fully passed.
+- Stop on blockers instead of improvising outside the plan. If the plan itself is wrong, stop and suggest revising it with `/dev_plan`.
+- `plan.md` is the source of truth for progress; `plan.html` is regenerated from it.
