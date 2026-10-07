@@ -28,7 +28,7 @@ You are executing `/dev_execute` — carry out an approved plan and close the TA
 
 ### 1. Prepare
 
-Collect the group's unticked items. **Re-check file overlap now** — code may have moved since planning. If two items list the same file, or an item's file was changed by an unfinished item, run those items sequentially instead of in parallel.
+Collect the group's unticked items. **Re-check file overlap now** — code may have moved since planning. If two items list the same file, run those items sequentially instead of in parallel.
 
 ### 2. Dispatch
 
@@ -37,6 +37,7 @@ Send each item to its agent with:
 - the full work item text (heading, Depends on, Files, Done when, steps);
 - the spec path, so the agent can read the design;
 - *"Follow `/dev_tdd` for code changes."*;
+- *"Only modify the files listed. If you need to change another file, stop and report which one and why instead of editing it."* — when an agent reports this, finish the rest of the group first, then run that item alone with the extra file added to its `Files:`;
 - in mainseat, the directive *"Operate in mainseat mode — provide ready-to-paste snippets, do not call Edit/Write."*
 
 Items assigned to `main session` you implement yourself.
@@ -49,9 +50,9 @@ The agent returns snippets; nothing is applied yet. Show them, then wait until t
 
 ### 4. Review
 
-Review each finished item with `code-reviewer` in work-item mode: pass the work item and its *Done when*. The reviewer ends with `VERDICT: PASS` or `VERDICT: FAIL — <reasons>`.
+Review each finished item with `code-reviewer` in work-item mode: pass the work item and its *Done when*. The reviewer ends with `VERDICT: PASS` or `VERDICT: FAIL — <reasons>`.{{IF_COPILOT}} If no subagent tool is available, review in this session: load `.github/chatmodes/code-reviewer.chatmode.md`, follow its work-item mode, and judge the item against its *Done when* as if someone else wrote it.{{/IF_COPILOT}}
 
-- **FAIL** → send the reasons back to the same agent for one rework round, then review again.
+- **FAIL** → send the item back to its agent for one rework round, with the full work item text and the reviewer's reasons (a new dispatch doesn't remember the first attempt); in mainseat, wait for the user to apply them again. Then review again.
 - **Second FAIL** → stop. Report the item, the reviewer's reasons, and what you suggest. Don't improvise a fix outside the plan.
 
 ### 5. Track
@@ -77,7 +78,7 @@ When the whole group has passed, move to the next group.
 2. Convert the Markdown to HTML yourself: headings get `id`s (lowercase, hyphenated); tables → `<table>`; fenced code → `<pre><code>` with `<`, `>`, `&` escaped; checkboxes → `☐` / `☑`.
 3. Fill `{{TITLE}}` (the doc's H1), `{{SOURCE_FILE}}` (the .md path), `{{TOC}}` (one `<a href="#id">` per H2), `{{CONTENT}}`.
 4. Write the result next to the source with the same name and `.html` extension, replacing any previous version.
-5. Open it: Windows `start "" "<path>"`, macOS `open "<path>"`, Linux `xdg-open "<path>"`. If the command fails or there is no desktop (SSH, WSL without a browser, container), print the absolute path and continue — never stop the skill over this.
+5. Open it: Windows `cmd /c start "" "<path>"` (works from PowerShell, cmd, and Git Bash), macOS `open "<path>"`, Linux `xdg-open "<path>"`. If the command fails or there is no desktop (SSH, WSL without a browser, container), print the absolute path and continue — never stop the skill over this.
 
 Render the Groups section of `plan.html` as `<div class="groups">` with one `<div class="group">` per group and one `<div class="wi">` per item; add class `done` to items whose heading ends with ✅.
 

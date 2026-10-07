@@ -74,7 +74,9 @@ If ANY target file already exists:
 
 NEVER overwrite without explicit permission. This is a hard rule.
 
-`.docs/todo.md` and `.docs/todo_done.md` with existing entries are never replaced wholesale in **Modify existing** mode: add the new Convention lines and keep every entry and tally as-is.
+`.docs/todo.md` and `.docs/todo_done.md` with existing entries are never replaced or reset, in every mode and whatever the user picks above: merge — add the new Convention lines (and a `TASK` section if missing) and keep every entry and tally as-is.
+
+**The workflow bundle is all-or-nothing, in every mode** (including Partial setup and Modify existing): the five workflow commands, `.docs/templates/`, `.docs/tasks/`, the manual, and the rules sections `Workflow — Triage / Direct / Quick / Feature`, `Verify Before Claiming Done`, `Review Feedback`, plus the Driver-Mode bookkeeping line. If the user picks **Skip** for an existing rules file, ask once whether to append the missing sections to it; if yes, append the missing sections without touching the rest; if no, warn in Phase 9 that the workflow commands rely on those sections.
 
 ## Phase 6: Configure
 
@@ -82,7 +84,7 @@ NEVER overwrite without explicit permission. This is a hard rule.
 
 Ask the user what task types and priority scale they want for their todo system. Offer possibilities without prescribing — don't bucket them by project type. Examples of task categories they might pick from or combine: `TASK`, `BUG`, `CR`, `SEC`, `POLISH`, `DOCS`, `RESEARCH`, `CHORE`. Examples of priority schemes: `P0–P5`, `High / Medium / Low`, `Now / Next / Later`, or anything custom.
 
-Let the user define what fits their project.
+Let the user define what fits their project. A `TASK` type is always included — feature TASKs (`/dev_feature`) are numbered from its tally — so add it if the user's list doesn't have it, and say so.
 
 ### Agents / Chat Modes
 
@@ -137,7 +139,7 @@ Using the templates from `.chisel/templates/` as starting points, generate all f
 
 ### Workflow conditionals
 
-Templates may contain `{{IF_CLAUDE}}…{{/IF_CLAUDE}}`, `{{IF_COPILOT}}…{{/IF_COPILOT}}`, and `{{IF_GREENFIELD}}…{{/IF_GREENFIELD}}` blocks. Keep the content of blocks that apply to this run (target tool, project state), delete the others entirely, and always delete the markers themselves.
+Templates may contain `{{IF_CLAUDE}}…{{/IF_CLAUDE}}`, `{{IF_COPILOT}}…{{/IF_COPILOT}}`, and `{{IF_GREENFIELD}}…{{/IF_GREENFIELD}}` blocks. Keep the content of blocks that apply to this run (target tool, project state), delete the others entirely, and always delete the markers themselves. A marker that sits on its own line is removed together with its line — generated workflow commands must start with `---` on line 1, or their frontmatter won't be recognized.
 
 Workflow command templates (`.chisel/templates/workflow/dev_*.md.template`) are **not** adapted beyond that: resolve only the `{{IF_…}}` blocks and copy the rest as-is. Their other `{{…}}` text (`{{TITLE}}`, `{{SOURCE_FILE}}`, `{{TOC}}`, `{{CONTENT}}`, `{{TODO: …}}`) is literal instruction text used when the commands run.
 
@@ -169,16 +171,16 @@ Workflow command templates (`.chisel/templates/workflow/dev_*.md.template`) are 
   - **Existing project** — Document the project structure, key systems, and patterns you discovered during exploration. Fill with REAL information from the codebase.
   - **Greenfield project** — Generate a scaffold with clearly-marked `{{TODO}}` placeholders for purpose, goals, key systems, tech choices, data model, and deployment. Do NOT invent content — the document is a form to fill in later, not fiction to write now.
 - **`.docs/todo.md`** — Task tracker with the user's chosen types and priority scale. Based on `todo.md.template`.
-  - **Greenfield projects only:** seed the tracker with a top-priority kickoff task, for example: *"Define project scope and initial architecture — fill in `.docs/architecture.md`"*. This gives the next working session a concrete starting point.
+  - **Greenfield projects only:** seed the tracker with a top-priority kickoff task, for example: *"Define project scope and initial architecture — fill in `.docs/architecture.md`"*. This gives the next working session a concrete starting point; `/dev_feature` promotes it to a feature TASK.
 - **`.docs/todo_done.md`** — Empty completed task archive. Based on `todo_done.md.template`.
 - **`.docs/tasks/.gitkeep`** + **`.docs/tasks/done/.gitkeep`** — empty files so the TASK folders exist in git.
 - **`.docs/templates/task-view.html`**, **`.docs/templates/spec.md`**, **`.docs/templates/plan.md`** — copied verbatim from `.chisel/templates/workflow/task-view.html.template`, `.chisel/templates/task/spec.md.template`, `.chisel/templates/task/plan.md.template`. The workflow commands read them at runtime (`.chisel/` is gone by then).
 - **`.docs/manual.md`** — the user manual, from `manual.md.template`. Fill `{{PROJECT_NAME}}`, `{{AGENTS_TABLE}}` (one row per generated agent: name · what it's for · edits code?), `{{TEST_INSTRUCTIONS}}` (same value as in the rules), and resolve its `{{IF_…}}` blocks (`{{IF_GREENFIELD}}` is kept only for greenfield projects).
-- **`.docs/manual.html`** — render `.docs/manual.md` into `.docs/templates/task-view.html` the same way the workflow commands do (see the *Render & open* section of `.chisel/templates/workflow/dev_feature.md.template`): fill `{{TITLE}}`, `{{SOURCE_FILE}}`, `{{TOC}}`, `{{CONTENT}}`. Render only — it is opened in Phase 9.
+- **`.docs/manual.html`** — using `.docs/templates/task-view.html` as the shell, write `.docs/manual.html` from `.docs/manual.md` (leave the template unchanged) the same way the workflow commands do (see the *Render & open* section of `.chisel/templates/workflow/dev_feature.md.template`): fill `{{TITLE}}`, `{{SOURCE_FILE}}`, `{{TOC}}`, `{{CONTENT}}`. Render only — it is opened in Phase 9.
 
 ## Phase 8: Self-Cleanup
 
-Always runs (acknowledged in Phase 2). Use a single platform-appropriate command (e.g. `rm -rf` on Unix-like shells) to delete:
+Always runs (acknowledged in Phase 2), but only after Phase 7 completed. If generation failed partway, report what was and wasn't created and stop — without cleanup, so the user can re-run. Use a single platform-appropriate command (e.g. `rm -rf` on Unix-like shells) to delete:
 
 - `.chisel/` (the entire directory — `body.md` and `templates/`)
 - `.claude/skills/dev-chisel/` (the entire directory)
@@ -194,11 +196,12 @@ After deletion, verify the listed paths no longer exist.
 
 ## Phase 9: Explain the System
 
-1. Open `.docs/manual.html`: Windows `start "" "<path>"`, macOS `open "<path>"`, Linux `xdg-open "<path>"`. If that fails or there is no desktop, print the absolute path.
+1. Open `.docs/manual.html`: Windows `cmd /c start "" "<path>"` (works from PowerShell, cmd, and Git Bash), macOS `open "<path>"`, Linux `xdg-open "<path>"`. If that fails or there is no desktop, print the absolute path.
 2. In chat, keep it short and loose — a few lines, no file-by-file walkthrough:
    - What was set up, one line per area: instructions, rules, agents, workflow commands, `.docs/`. Mention any files backed up (`.old`).
    - How to work: *"Just ask — I'll pick Direct, Quick, or Feature. For a feature I'll ask first."*
-   - **Greenfield:** the kickoff TASK in `.docs/todo.md` is the first step — run `/dev_feature` on it.
+   - **Greenfield:** the kickoff TASK in `.docs/todo.md` is the first step — run `/dev_feature TASK-<number>` (name the actual number) to define the project.
+   - Any files skipped in Phase 5, and whether the workflow sections are missing from a skipped rules file.
    - *"Everything else is in the manual that just opened (`.docs/manual.md`)."*
 3. Confirm the scaffolder source was removed (*"Scaffolder source removed — `/dev-chisel` is gone; everything generated stays."*).
 

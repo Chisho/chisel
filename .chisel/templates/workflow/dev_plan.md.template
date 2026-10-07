@@ -18,7 +18,7 @@ You are executing `/dev_plan` — turn an approved spec into work items that age
 
 1. Read `.docs/architecture.md` and the rules file ({{IF_CLAUDE}}`.claude/rules/rules.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/instructions/rules.instructions.md`{{/IF_COPILOT}}).
 2. **Find the TASK** — use the one the user named. Otherwise look in `.docs/todo.md` for TASKs at `specced`: if exactly one, use it; if several, ask which.
-3. **Check the status** — it must be `specced`. If it's `brainstorming`, say *"The spec isn't approved yet — run `/dev_feature` first."* and stop. If a `plan.md` already exists, ask whether to revise it or start over.
+3. **Check the status** — it must be `specced`. If it's `brainstorming`, say *"The spec isn't approved yet — run `/dev_feature` first."* and stop. If it's `planned` or `in-progress` and the user asks to revise the plan (or `/dev_execute` sent you here), revise instead: keep items marked ✅, re-derive the rest from the spec, re-check groups and coverage, update Progress, and after approval set the status back to `planned` (nothing done yet) or `in-progress n/m`. If a `plan.md` already exists at `specced`, ask whether to revise it or start over.
 4. Read the TASK's `spec.md` in full, then the code its Design section touches.
 5. List the project's agents ({{IF_CLAUDE}}`.claude/agents/`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/chatmodes/`{{/IF_COPILOT}}) — work items are assigned to them.
 
@@ -59,7 +59,7 @@ followed by the `Depends on:`, `Files:`, `Done when:` lines and the steps. Set *
 2. Convert the Markdown to HTML yourself: headings get `id`s (lowercase, hyphenated); tables → `<table>`; fenced code → `<pre><code>` with `<`, `>`, `&` escaped; checkboxes → `☐` / `☑`.
 3. Fill `{{TITLE}}` (the doc's H1), `{{SOURCE_FILE}}` (the .md path), `{{TOC}}` (one `<a href="#id">` per H2), `{{CONTENT}}`.
 4. Write the result next to the source with the same name and `.html` extension, replacing any previous version.
-5. Open it: Windows `start "" "<path>"`, macOS `open "<path>"`, Linux `xdg-open "<path>"`. If the command fails or there is no desktop (SSH, WSL without a browser, container), print the absolute path and continue — never stop the skill over this.
+5. Open it: Windows `cmd /c start "" "<path>"` (works from PowerShell, cmd, and Git Bash), macOS `open "<path>"`, Linux `xdg-open "<path>"`. If the command fails or there is no desktop (SSH, WSL without a browser, container), print the absolute path and continue — never stop the skill over this.
 
 For `plan.html`, also render the Groups section as `<div class="groups">` with one `<div class="group"><h4>Group X</h4>` per group and one `<div class="wi">` per item inside it, with a `<small>` line *agent · depends on*. Add class `done` to items whose heading ends with ✅.
 

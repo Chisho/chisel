@@ -5,7 +5,7 @@ Only NOT DONE items. For completed tasks and fixed bugs, see `.docs/todo_done.md
 > **Convention:** New entries are always added **at the end** of their type section.
 > After adding an entry, **increment the tally** at the bottom of that section to keep the count accurate.
 > The tally tracks: total count (open + done across both files). Used to correctly index the next entry when adding.
-> **Feature TASKs** use one line linking to their folder: `` - **TASK-012** [P1] User authentication — `planned` 3/7 → .docs/tasks/TASK-012-user-auth/ ``
+> **Feature TASKs** use one line linking to their folder: `` - **TASK-012** [P1] User authentication — `in-progress 3/7` → .docs/tasks/TASK-012-user-auth/ ``
 > Status moves `brainstorming` → `specced` → `planned` → `in-progress n/m` → `done`. Only `/dev_feature`, `/dev_plan`, `/dev_execute` change it.
 > TASK numbers share the TASK tally with quick TASK entries — never restart numbering.
 

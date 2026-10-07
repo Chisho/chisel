@@ -17,18 +17,19 @@ You are executing `/dev_feature` — turn a feature idea into an approved spec. 
 ## Before starting
 
 1. Read `.docs/architecture.md` and the rules file ({{IF_CLAUDE}}`.claude/rules/rules.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/instructions/rules.instructions.md`{{/IF_COPILOT}}).
-2. If the user named an existing TASK (number or folder), **resume it** instead of creating a new one: read its `spec.md` and continue from its status in `.docs/todo.md`.
+2. If the user named an existing TASK (number or folder), **resume it** instead of creating a new one: read its `spec.md` if present and continue from its status in `.docs/todo.md`.
    - `brainstorming` → continue at step 2 below.
-   - `specced` or later → the spec is already approved; offer `/dev_plan` (or the next step) and stop.
-3. If any `.docs/` section this feature depends on still has a `{{TODO: …}}` marker, name it and ask the user to resolve it first.
+   - `specced` or later → the spec is already approved; offer `/dev_plan` (or the next step) and stop — unless the user asks to revise the spec: then edit `spec.md`, run steps 6–8 again, set the status back to `specced`, and warn that the plan must be revised with `/dev_plan` before executing further.
+   - **Promote an existing entry** — if the named entry is a plain todo line (no status, no folder), keep its number: rewrite the line in feature format, create the folder (step 1), and do **not** increment the tally.
+3. If any `.docs/` section this feature depends on still has a `{{TODO: …}}` marker, name it and ask the user to resolve it first — unless this TASK exists to fill those markers (e.g. the greenfield kickoff). Then the answers become part of the spec, and on approval (step 8) you replace those markers in `.docs/` with the decisions.
 
 ## Steps
 
 ### 1. Create the TASK
 
-- **Number** — take the next TASK number from the tally in `.docs/todo.md`. Never restart numbering.
-- **Slug** — from the title: lowercase ASCII, words joined by `-`, other characters dropped, max 40 characters. Example: *"Import/Export (CSV & JSON)"* → `import-export-csv-json`.
-- **Folder** — create `.docs/tasks/TASK-NNN-<slug>/`. If that folder already exists, append `-2`, `-3`… until it is unique.
+- **Number** — take the next TASK number from the tally in `.docs/todo.md`. Never restart numbering. If the TASK section or its tally is missing, add a `TASK` section with tally 0 at the end of `todo.md` first.
+- **Slug** — from the title: transliterate accents (`é` → `e`), lowercase, treat every non-alphanumeric character as a separator, join words with `-`, collapse repeated `-`, trim `-` from both ends, and cut at a word boundary to 40 characters at most. If nothing is left (e.g. a title in a non-Latin script), use `task`. Example: *"Import/Export (CSV & JSON)"* → `import-export-csv-json`.
+- **Folder** — create `.docs/tasks/TASK-NNN-<slug>/`. If that folder already exists, append `-2`, `-3`… until it is unique. The todo line links to the final folder name.
 - **Todo line** — add at the end of the TASK section, then increment the tally:
   `` - **TASK-NNN** [<priority>] <title> — `brainstorming` → .docs/tasks/TASK-NNN-<slug>/ ``
   Ask for the priority if the user didn't give one.
@@ -76,14 +77,14 @@ Re-read the spec once with fresh eyes and fix problems inline:
 2. Convert the Markdown to HTML yourself: headings get `id`s (lowercase, hyphenated); tables → `<table>`; fenced code → `<pre><code>` with `<`, `>`, `&` escaped; checkboxes → `☐` / `☑`.
 3. Fill `{{TITLE}}` (the doc's H1), `{{SOURCE_FILE}}` (the .md path), `{{TOC}}` (one `<a href="#id">` per H2), `{{CONTENT}}`.
 4. Write the result next to the source with the same name and `.html` extension, replacing any previous version.
-5. Open it: Windows `start "" "<path>"`, macOS `open "<path>"`, Linux `xdg-open "<path>"`. If the command fails or there is no desktop (SSH, WSL without a browser, container), print the absolute path and continue — never stop the skill over this.
+5. Open it: Windows `cmd /c start "" "<path>"` (works from PowerShell, cmd, and Git Bash), macOS `open "<path>"`, Linux `xdg-open "<path>"`. If the command fails or there is no desktop (SSH, WSL without a browser, container), print the absolute path and continue — never stop the skill over this.
 
 ### 8. Approval gate
 
 Ask: *"The spec is open in your browser (`spec.html`). Approve it, or tell me what to change."*
 
 - **Changes** → edit `spec.md`, re-run self-review, re-render, ask again.
-- **Approved** → set the todo status to `specced`, then offer: *"Spec approved. Run `/dev_plan` next?"*
+- **Approved** → if this TASK fills `{{TODO: …}}` markers, replace them in `.docs/` with the approved decisions. Set the todo status to `specced`, then offer: *"Spec approved. Run `/dev_plan` next?"*
 
 ## Rules
 

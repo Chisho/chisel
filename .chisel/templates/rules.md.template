@@ -16,6 +16,8 @@ Mode is set conversationally:
 - `/dev_mainseat` flips this conversation to mainseat.
 - `/dev_backseat` reverts to backseat.
 
+Workflow bookkeeping under `.docs/` (todo entries, `spec.md`, `plan.md`, their HTML views, moving TASK folders) is always written directly, even in mainseat — mainseat governs project code only.
+
 When launching a code-modifying subagent (e.g. frontend-developer, backend-developer, embedded-developer) while in **mainseat**, include the directive *"Operate in mainseat mode — provide ready-to-paste snippets, do not call Edit/Write."* in the subagent's task description so the subagent inherits the mode. Read-only subagents (architect, code-reviewer, security-expert) don't need this — they can't edit anyway.
 
 ## Pre-Production — No Legacy

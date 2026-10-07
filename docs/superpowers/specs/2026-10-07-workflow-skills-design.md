@@ -119,7 +119,7 @@ Folded principles added to rules.md:
 
 **todo.md entry (feature TASK):**
 ```
-- **TASK-012** [P1] User authentication — `planned` 3/7 → .docs/tasks/TASK-012-user-auth/
+- **TASK-012** [P1] User authentication — `in-progress 3/7` → .docs/tasks/TASK-012-user-auth/
 ```
 Quick entries keep today's format. TASK numbering uses the existing tally convention.
 
