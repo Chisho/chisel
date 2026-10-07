@@ -63,6 +63,8 @@ Copilot:  .github/prompts/{dev_feature,dev_plan,dev_execute,dev_debug,dev_tdd}.p
 
 .docs/
 ├── manual.md  manual.html          # user manual
+├── templates/                     # spec.md, plan.md, task-view.html — used by the skills at runtime
+│                                   # (copied here because .chisel/ is deleted by cleanup)
 ├── todo.md  todo_done.md
 └── tasks/
     ├── TASK-NNN-<slug>/
