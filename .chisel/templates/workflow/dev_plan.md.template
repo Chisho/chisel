@@ -1,0 +1,79 @@
+{{IF_CLAUDE}}
+---
+name: dev_plan
+description: Turn an approved TASK spec into a plan of work items with agents, dependencies, files, and parallel groups; render plan.html; get approval. Use after /dev_feature.
+---
+{{/IF_CLAUDE}}
+{{IF_COPILOT}}
+---
+description: Turn an approved TASK spec into a plan of work items with agents, dependencies, files, and parallel groups; render plan.html; get approval.
+mode: agent
+---
+{{/IF_COPILOT}}
+<!-- Adapted from superpowers by Jesse Vincent (MIT) -->
+
+You are executing `/dev_plan` — turn an approved spec into work items that agents can implement, in parallel where it's safe. This is step 2 of the Feature flow: `/dev_feature` → `/dev_plan` → `/dev_execute`.
+
+## Before starting
+
+1. Read `.docs/architecture.md` and the rules file ({{IF_CLAUDE}}`.claude/rules/rules.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/instructions/rules.instructions.md`{{/IF_COPILOT}}).
+2. **Find the TASK** — use the one the user named. Otherwise look in `.docs/todo.md` for TASKs at `specced`: if exactly one, use it; if several, ask which.
+3. **Check the status** — it must be `specced`. If it's `brainstorming`, say *"The spec isn't approved yet — run `/dev_feature` first."* and stop. If a `plan.md` already exists, ask whether to revise it or start over.
+4. Read the TASK's `spec.md` in full, then the code its Design section touches.
+5. List the project's agents ({{IF_CLAUDE}}`.claude/agents/`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/chatmodes/`{{/IF_COPILOT}}) — work items are assigned to them.
+
+## Steps
+
+### 1. Derive work items
+
+A work item is one coherent change that an agent can finish and a reviewer can judge on its own. Too small (a single line) wastes a review; too big (a whole subsystem) can't be reviewed well. For each item fill in:
+
+- **Title** — what it delivers, not how.
+- **Agent** — the best match from the project's agents (e.g. `backend-developer` for an API endpoint). If none fits, write `main session`.
+- **Depends on** — the items whose output this one needs, or `—`.
+- **Files** — the exact paths it creates or modifies. Be complete: this list drives parallel safety.
+- **Done when** — a concrete check: a command and its expected result, or an observable behavior. *"Works correctly"* is not a check.
+- **Steps** — 2–6 short `- [ ]` steps. Include the test step when the project has tests.
+
+### 2. Assign groups
+
+- Order items by dependencies. Items with no unmet dependencies go in group A; items that depend only on group A go in group B; and so on.
+- Items in the same group must have **disjoint `Files:` lists**. If two items in a group share a file, move one to the next group.
+- Fewer, fuller groups are better: put an item in the earliest group its dependencies allow.
+
+### 3. Check coverage
+
+Fill the Coverage table: every acceptance criterion in the spec maps to at least one work item. If a criterion has no item, add one. If an item serves no criterion, question whether it belongs.
+
+### 4. Write `plan.md`
+
+Copy `.docs/templates/plan.md` into the TASK folder and fill it: the Groups table, the Coverage table, and every work item in the exact format
+
+`### WI-<n> — <title>   [group <X> · agent: <agent-name>]`
+
+followed by the `Depends on:`, `Files:`, `Done when:` lines and the steps. Set **Progress** to `0/<number of items>`.
+
+### 5. Render & open
+
+1. Read `.docs/templates/task-view.html` and the source `.md`.
+2. Convert the Markdown to HTML yourself: headings get `id`s (lowercase, hyphenated); tables → `<table>`; fenced code → `<pre><code>` with `<`, `>`, `&` escaped; checkboxes → `☐` / `☑`.
+3. Fill `{{TITLE}}` (the doc's H1), `{{SOURCE_FILE}}` (the .md path), `{{TOC}}` (one `<a href="#id">` per H2), `{{CONTENT}}`.
+4. Write the result next to the source with the same name and `.html` extension, replacing any previous version.
+5. Open it: Windows `start "" "<path>"`, macOS `open "<path>"`, Linux `xdg-open "<path>"`. If the command fails or there is no desktop (SSH, WSL without a browser, container), print the absolute path and continue — never stop the skill over this.
+
+For `plan.html`, also render the Groups section as `<div class="groups">` with one `<div class="group"><h4>Group X</h4>` per group and one `<div class="wi">` per item inside it, with a `<small>` line *agent · depends on*. Add class `done` to items whose heading ends with ✅.
+
+### 6. Approval gate
+
+Ask: *"The plan is open in your browser (`plan.html`): <n> work items in <g> groups. Approve it, or tell me what to change."*
+
+- **Changes** → edit `plan.md`, re-check groups and coverage, re-render, ask again.
+- **Approved** → set the todo status to `planned`, then offer: *"Plan approved. Run `/dev_execute` next?"*
+
+## Rules
+
+- Never write or change project code in this skill — it only writes `.docs/` files.
+- Never put two items that touch the same file in one group.
+- Never set `planned` without the user's explicit approval.
+- If planning reveals that the spec is wrong or incomplete, stop and say what's missing — suggest updating the spec with `/dev_feature` rather than planning around it.
+- `plan.md` is the source of truth. Never edit `plan.html` by hand; re-render it.
