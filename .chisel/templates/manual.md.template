@@ -1,0 +1,66 @@
+# {{PROJECT_NAME}} — Working with your AI assistant
+
+This project is set up so your AI assistant already knows the codebase, the rules, and how work gets tracked. This page explains how to use it. You don't need to memorize anything — just ask.
+
+## Just ask
+
+Talk to the assistant normally. Before it starts, it sorts every request into one of three tiers:
+
+| Tier | For | What you'll see |
+|---|---|---|
+| **Direct** | Small, exact changes — *"sort this list in `parse_rows`"* | It makes the change, runs a check, and tells you in a line or two. |
+| **Quick** | Small tasks that need a decision, and most bugs | A short plan in chat. Approve it, and it implements, tests, and updates the docs. |
+| **Feature** | New features or anything that spans several parts of the code | It asks first: *"This looks like a feature — run it as a TASK with a spec?"* |
+
+If it picks wrong, say so: *"just do it"* keeps things light, *"make this a feature"* switches to the full flow.
+
+## Features, step by step
+
+1. **`/dev_feature`** — the assistant asks you questions one at a time, proposes approaches, and writes a spec. The spec opens in your browser (`spec.html`). Approve it or ask for changes.
+2. **`/dev_plan`** — it splits the spec into work items, grouped so independent pieces can be built in parallel. The plan opens in your browser (`plan.html`). Approve it or ask for changes.
+3. **`/dev_execute`** — specialist agents build the work items group by group; `code-reviewer` checks each one. Progress shows in `.docs/todo.md`. At the end it verifies everything and asks you to confirm the TASK is done.
+
+Each step offers the next, so you rarely need to type the commands. If a conversation ends halfway, run the next command in a new conversation — it picks up where it left off.
+
+To change a spec or plan, edit the `.md` file (or ask the assistant to), never the `.html` — the HTML is regenerated from the Markdown.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `/dev_feature` | Start (or resume) a feature: questions → spec |
+| `/dev_plan` | Turn an approved spec into work items |
+| `/dev_execute` | Build the work items, review them, close the TASK |
+| `/dev_debug` | Track down a bug's root cause before fixing it |
+| `/dev_tdd` | Make a change test-first |
+| `/dev_mainseat` | You drive: the assistant gives you snippets instead of editing files (this conversation only) |
+| `/dev_backseat` | Back to normal: the assistant edits, you review |
+
+## Agents
+
+{{AGENTS_TABLE}}
+
+## Where things live
+
+| Path | What |
+|---|---|
+| `.docs/architecture.md` | How the project is built — the assistant reads it before working |
+| `.docs/todo.md` / `todo_done.md` | Open and finished work |
+| `.docs/tasks/` | One folder per feature TASK: `spec.md`, `plan.md` and their HTML views |
+| `.docs/tasks/done/` | Finished TASK folders |
+| `.docs/templates/` | Formats for specs, plans, and HTML views — edit only to change the format |
+| {{IF_CLAUDE}}`.claude/rules/rules.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/instructions/rules.instructions.md`{{/IF_COPILOT}} | The rules the assistant follows — add your own conventions here |
+
+Add any other notes to `.docs/` (API docs, decisions, runbooks) — the assistant reads them when a task needs them.
+
+## Tips
+
+- Tests run with: {{TEST_INSTRUCTIONS}}
+- Ask *"what's on the todo list?"* to pick up where you left off.
+- Ask *"how do I …?"* about this setup — the assistant can read this manual too.
+{{IF_GREENFIELD}}
+
+## Start here
+
+Your todo list already has a kickoff TASK: define the project's scope and architecture. Run `/dev_feature` on it — the answers fill in `.docs/architecture.md`, and everything else builds on that.
+{{/IF_GREENFIELD}}
