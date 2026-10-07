@@ -1,6 +1,6 @@
 # TASK-{{TASK_NUMBER}} — {{TASK_TITLE}}
 
-**Status:** {{STATUS}} · **Priority:** {{PRIORITY}} · **Todo entry:** `.docs/todo.md`
+**Priority:** {{PRIORITY}} · **Status:** tracked in `.docs/todo.md`
 
 ## Goal
 

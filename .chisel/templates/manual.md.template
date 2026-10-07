@@ -55,7 +55,7 @@ Add any other notes to `.docs/` (API docs, decisions, runbooks) — the assistan
 
 ## Tips
 
-- Tests run with: {{TEST_INSTRUCTIONS}}
+- Testing: {{TEST_INSTRUCTIONS}}
 - Ask *"what's on the todo list?"* to pick up where you left off.
 - Ask *"how do I …?"* about this setup — the assistant can read this manual too.
 {{IF_GREENFIELD}}

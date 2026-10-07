@@ -158,7 +158,7 @@ Each agent becomes a Claude Code subagent or a Copilot chat mode. **The set belo
 | **backend-developer**  | Server logic, database, APIs                                  | Can edit  |
 | **embedded-developer** | Firmware, drivers, RTOS, hardware integration                 | Can edit  |
 
-**Rolling your own:** agent templates live in `.chisel/templates/agents/` as `{{PLACEHOLDER}}`-driven Markdown. Add a new `.md.template` there and it's available to future runs; or just ask for a custom role during a run and Chisel writes it inline. Read-only agents get `Read, Grep, Glob, Bash`; code-modifying agents also get `Edit`/`Write` and honor driver mode.
+**Rolling your own:** agent templates live in `.chisel/templates/agents/` as `{{PLACEHOLDER}}`-driven Markdown. Add a new `.md.template` there before running `/dev-chisel` and it's offered alongside the defaults (after a run the scaffolder is removed, so reinstall Chisel to add more later); or just ask for a custom role during a run and Chisel writes it inline. Read-only agents get `Read, Grep, Glob, Bash`; code-modifying agents also get `Edit`/`Write` and honor driver mode.
 
 ---
 

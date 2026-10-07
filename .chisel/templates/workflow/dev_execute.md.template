@@ -70,7 +70,7 @@ When the whole group has passed, move to the next group.
 1. **Verify** — run the check for every acceptance criterion in `spec.md` and show the output. No "should work" (see *Verify Before Claiming Done* in the rules).
 2. **Docs** — update `.docs/architecture.md` and any other `.docs/` file the change affects.
 3. **Confirm** — ask: *"All work items passed and the acceptance criteria are verified. Close TASK-NNN?"*
-4. **On yes** — set the status to `done`; move the todo line to `.docs/todo_done.md`; move the TASK folder to `.docs/tasks/done/`.
+4. **On yes** — set the status to `done`; move the TASK folder to `.docs/tasks/done/`; move the todo line to `.docs/todo_done.md` and rewrite its link to `.docs/tasks/done/TASK-NNN-<slug>/` so it still resolves.
 
 ## Render & open
 
