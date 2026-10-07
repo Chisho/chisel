@@ -1,0 +1,25 @@
+# TASK-{{TASK_NUMBER}} — {{TASK_TITLE}} · Plan
+
+**Spec:** `spec.md` · **Progress:** 0/{{WI_COUNT}}
+
+## Groups
+
+Groups run in order. Items inside one group run in parallel and never touch the same file.
+
+| Group | Work items | Depends on groups |
+|---|---|---|
+| A | WI-1, WI-2 | — |
+
+## Coverage
+
+| Acceptance criterion | Work items |
+|---|---|
+| 1 | WI-1 |
+
+## Work items
+
+### WI-1 — <title>   [group A · agent: <agent-name>]
+Depends on: —
+Files: `path/to/file`
+Done when: <concrete, checkable condition>
+- [ ] <step>

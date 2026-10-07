@@ -1,0 +1,33 @@
+# TASK-{{TASK_NUMBER}} — {{TASK_TITLE}}
+
+**Status:** {{STATUS}} · **Priority:** {{PRIORITY}} · **Todo entry:** `.docs/todo.md`
+
+## Goal
+
+What this TASK delivers and for whom, in 2–4 sentences.
+
+## Context
+
+Relevant existing code, docs, and constraints discovered while exploring. Link files by path.
+
+## Decisions
+
+| # | Decision | Why |
+|---|---|---|
+| D1 | … | … |
+
+## Design
+
+How it works: components, data flow, interfaces, error handling. Use subsections (`###`) per component.
+
+## Out of scope
+
+What this TASK deliberately does not do.
+
+## Acceptance criteria
+
+1. Each criterion is concrete and checkable (a command, a behavior, an observable result).
+
+## Open questions
+
+None — or a list. A spec with open questions is not approved.
