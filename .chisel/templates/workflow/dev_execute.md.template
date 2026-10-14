@@ -42,7 +42,7 @@ Send each item to its agent with:
 
 Items assigned to `main session` you implement yourself.
 
-{{IF_CLAUDE}}Launch the group's independent items in a single message with one Agent tool call per item so they run in parallel.{{/IF_CLAUDE}}{{IF_COPILOT}}If a subagent tool is available, use it for each item. Otherwise implement the items one by one in this session, following that agent's instructions (`.github/agents/<agent>.agent.md`).{{/IF_COPILOT}}
+{{IF_CLAUDE}}Launch the group's independent items in a single message with one Agent tool call per item so they run in parallel.{{/IF_CLAUDE}}{{IF_COPILOT}}Dispatch each item to its custom agent as a subagent with the **Run Subagent** tool (`runSubagent`), naming the agent exactly as its file in `.github/agents/` (names are case-sensitive) — e.g. *"Use the backend-developer subagent to implement WI-3: …"* followed by everything above. Start the group's independent items together if Copilot allows; otherwise run them one after another. If Run Subagent isn't available, tell the user once how to enable it (*Configure Tools → Run Subagent*), then implement the items one by one in this session, following each agent's instructions (`.github/agents/<agent>.agent.md`).{{/IF_COPILOT}}
 
 ### 3. Mainseat only
 
@@ -50,7 +50,7 @@ The agent returns snippets; nothing is applied yet. Show them, then wait until t
 
 ### 4. Review
 
-Review each finished item with `code-reviewer` in work-item mode: pass the work item and its *Done when*. The reviewer ends with `VERDICT: PASS` or `VERDICT: FAIL — <reasons>`.{{IF_COPILOT}} If no subagent tool is available, review in this session: load `.github/agents/code-reviewer.agent.md`, follow its work-item mode, and judge the item against its *Done when* as if someone else wrote it.{{/IF_COPILOT}}
+Review each finished item with `code-reviewer` in work-item mode: pass the work item and its *Done when*. The reviewer ends with `VERDICT: PASS` or `VERDICT: FAIL — <reasons>`.{{IF_COPILOT}} Run the review as the code-reviewer subagent (Run Subagent) so a fresh context judges the work. If Run Subagent isn't available, review in this session: load `.github/agents/code-reviewer.agent.md`, follow its work-item mode, and judge the item against its *Done when* as if someone else wrote it.{{/IF_COPILOT}}
 
 - **FAIL** → send the item back to its agent for one rework round, with the full work item text and the reviewer's reasons (a new dispatch doesn't remember the first attempt); in mainseat, wait for the user to apply them again. Then review again.
 - **Second FAIL** → stop. Report the item, the reviewer's reasons, and what you suggest. Don't improvise a fix outside the plan.

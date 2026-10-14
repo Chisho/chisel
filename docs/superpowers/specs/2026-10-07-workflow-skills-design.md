@@ -252,3 +252,8 @@ A sixth workflow command, always generated, written in the same style (not adapt
 ## 10. Amendment (2026-10-14) — current VS Code Copilot format
 
 Found during a Copilot test run and confirmed against the VS Code docs: custom chat modes are now **custom agents** in `.github/agents/<name>.agent.md`, and prompt files use `agent: agent` (not `mode: agent`). Chisel's Copilot target now generates that format everywhere (agents, workflow and driver-mode prompts, the `dev-chisel` entry) and offers to migrate an older `.github/chatmodes/` folder. Where §4.2, §4.8 and §4.9 say "chat mode", read "custom agent". Using custom agents as Copilot subagents in `/dev_execute` is deferred.
+
+## 11. Amendment (2026-10-14) — target detection and Copilot subagents
+
+- **Target detection:** the entry points state the tool they run in; Phase 3 uses it without asking, asks one question only when the project has a setup for the other tool only, and honors an explicit override.
+- **Copilot `/dev_execute`:** work items and `code-reviewer` run as custom-agent subagents via VS Code's Run Subagent tool (`runSubagent`); concurrent when Copilot allows, else sequential; if the tool isn't enabled, the user is told how to enable it and execution falls back to in-session. No `tools:` frontmatter is added (it would restrict the prompt's tools).

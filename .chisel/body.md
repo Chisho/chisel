@@ -7,10 +7,9 @@ Before asking anything, silently gather context. Do not assume what the project 
 1. Read whatever project manifest exists (examples: `package.json`, `Cargo.toml`, `project.godot`, `pyproject.toml`, `go.mod`, `Gemfile`, `composer.json`, `CMakeLists.txt`, etc.) to identify the tech stack
 2. Run `git log --oneline -10` to understand recent activity
 3. Scan the top-level directory structure
-4. Check if `.claude/`, `.github/`, and `.docs/` already exist and what's inside them. Use this to suggest a likely target in Phase 3:
-   - If `.claude/` already has content beyond the `dev-chisel` skill itself → likely **Claude Code**
-   - If `.github/copilot-instructions.md` or `.github/instructions/` exists → likely **Copilot**
-   - If both or neither → no default, ask the user
+4. Check if `.claude/`, `.github/`, and `.docs/` already exist and what's inside them. Note which tool an existing setup belongs to — Phase 3 uses it to spot a conflict:
+   - `.claude/` has content beyond the `dev-chisel` skill itself → existing **Claude Code** setup
+   - `.github/copilot-instructions.md`, `.github/instructions/`, `.github/agents/`, or `.github/chatmodes/` exists → existing **Copilot** setup
 5. **Check for a whole-repo copy.** If the project's README, LICENSE, `docs/superpowers/`, or git history belong to Chisel itself (e.g. a README titled "Chisel", commits about the scaffolder), the whole Chisel repo was copied instead of only `.chisel/`, `.claude/`, `.github/`. Stop before Phase 2 and tell the user: Chisel would describe itself as the project. Show the correct install (`cp -r /path/to/chisel/{.chisel,.claude,.github} .` into the real project) and ask whether to stop so they can clean up, or continue anyway. Never treat Chisel's own files as project content.
 6. Classify project maturity based on what you found:
    - **Greenfield** — no project manifest and little to no source code (empty repo, or only README/LICENSE). Architecture docs will need to be defined rather than discovered.
@@ -36,13 +35,14 @@ If the user does not acknowledge, stop the run without creating any files. Clean
 
 ## Phase 3: Pick Target Tool
 
-Ask the user which AI coding assistant this setup is for:
+Don't ask. Use the target the entry point gave you — the `dev-chisel` skill says Claude Code, the `dev-chisel` prompt says GitHub Copilot; only the matching tool can load each one.
 
-> **Target tool?**
-> 1. **Claude Code** — uses `.claude/` (CLAUDE.md, rules, agents)
-> 2. **GitHub Copilot** — uses `.github/` (copilot-instructions.md, instructions, custom agents)
+- **Claude Code** — uses `.claude/` (CLAUDE.md, rules, agents)
+- **GitHub Copilot** — uses `.github/` (copilot-instructions.md, instructions, custom agents)
 
-If Phase 1 detected an existing setup, suggest that as the default but let the user override.
+**Conflict:** if Phase 1 found an existing setup for the *other* tool only (e.g. running in Copilot, but `.claude/` has a setup and `.github/` doesn't), ask one question: generate for the tool you're running in, or for the existing one?
+
+**Override:** if the user explicitly asks for the other tool, use it.
 
 This choice determines the target directories and file formats for the rest of the run. The `.docs/` folder is tool-agnostic and used either way.
 
@@ -51,7 +51,7 @@ This choice determines the target directories and file formats for the rest of t
 Present what you found:
 > **Project detected:** [only what you actually confirmed — tech stack, language, framework]
 > **Project state:** [greenfield / existing]
-> **Target tool:** [Claude Code / Copilot]
+> **Target tool:** [Claude Code / Copilot] (detected)
 > **Existing setup:** [none / partial / full — list what exists in the relevant dirs]
 > **Self-cleanup at end:** yes (acknowledged)
 

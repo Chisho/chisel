@@ -61,7 +61,7 @@ Under the hood, a single instruction file (`.chisel/body.md`) drives both the Cl
 
 1. **Explore** — reads your manifest (`package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, …), git history, directory layout, and test setup. Records only what it can confirm; nothing is assumed. Classifies the project as **greenfield** (little/no code — architecture to be defined) or **existing** (architecture to be discovered).
 2. **Self-cleanup notice** — tells you up front that the scaffolder will remove its own source at the end, and asks you to acknowledge it. No acknowledgement, no run.
-3. **Pick target tool** — Claude Code (`.claude/`) or GitHub Copilot (`.github/`). Chisel suggests a default if it detects an existing setup.
+3. **Pick target tool** — Chisel detects which tool it's running in (Claude Code → `.claude/`, GitHub Copilot → `.github/`) and uses it without asking. It asks only if the project already has a setup for the other tool, and you can always ask for the other one.
 4. **Ask what you want** — full setup, partial setup, add agents, or modify an existing config.
 5. **Handle existing files** — if anything would be overwritten, Chisel asks first (skip / overwrite / back-up-and-overwrite). **It never overwrites without permission**, and an existing todo list keeps every entry.
 6. **Configure** — you choose task types & priority scheme, which agents to add (`code-reviewer` is always included), project-specific rules, and whether the project is pre-production. The workflow itself is always included.
