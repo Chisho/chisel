@@ -11,10 +11,11 @@ Before asking anything, silently gather context. Do not assume what the project 
    - If `.claude/` already has content beyond the `dev-chisel` skill itself → likely **Claude Code**
    - If `.github/copilot-instructions.md` or `.github/instructions/` exists → likely **Copilot**
    - If both or neither → no default, ask the user
-5. Classify project maturity based on what you found:
+5. **Check for a whole-repo copy.** If the project's README, LICENSE, `docs/superpowers/`, or git history belong to Chisel itself (e.g. a README titled "Chisel", commits about the scaffolder), the whole Chisel repo was copied instead of only `.chisel/`, `.claude/`, `.github/`. Stop before Phase 2 and tell the user: Chisel would describe itself as the project. Show the correct install (`cp -r /path/to/chisel/{.chisel,.claude,.github} .` into the real project) and ask whether to stop so they can clean up, or continue anyway. Never treat Chisel's own files as project content.
+6. Classify project maturity based on what you found:
    - **Greenfield** — no project manifest and little to no source code (empty repo, or only README/LICENSE). Architecture docs will need to be defined rather than discovered.
    - **Existing** — has a manifest and/or meaningful source code. Architecture docs can be filled from exploration.
-6. Detect the test setup (test directories, test scripts in the manifest, test framework config). Record the test command if found — it fills `{{TEST_INSTRUCTIONS}}` in the rules and the manual. If there is none, `{{TEST_INSTRUCTIONS}}` says so and points to `/dev_tdd`, which proposes setting tests up.
+7. Detect the test setup (test directories, test scripts in the manifest, test framework config). Record the test command if found — it fills `{{TEST_INSTRUCTIONS}}` in the rules and the manual. If there is none, `{{TEST_INSTRUCTIONS}}` says so and points to `/dev_tdd`, which proposes setting tests up.
 
 ## Phase 2: Self-Cleanup Notice
 
@@ -104,6 +105,8 @@ Ask: *"`code-reviewer` is always included. Which others would you like? You can 
 Agents fall into two groups:
 - **Code-modifying** (frontend-developer, backend-developer, embedded-developer) — tools include `Edit` and `Write`; the agent can make changes directly. These agents honor driver-mode by checking their task prompt for a *"mainseat"* directive: in **backseat** (default — no directive) they edit files directly; if the main session passes a mainseat directive, they walk the user through ready-to-paste snippets instead. Toggle the conversation's mode with `/dev_mainseat` and `/dev_backseat`.
 - **Read-only** (architect, code-reviewer, security-expert) — tools are `Read, Grep, Glob, Bash` only. The agent plans, reviews, or recommends; the user applies changes. Driver-mode does not apply (these agents can't edit anyway).
+
+Present the two groups as separate questions when your question tool limits the number of options (e.g. 4 per question): read-only agents in one, code-modifying agents in the other — never mixing the two groups in one question. Without such a limit, one list grouped under two headings is fine.
 
 For user-added templates not named above, infer the group from the template's `tools:` frontmatter — templates whose tools include `Edit`/`Write` are code-modifying (and get the driver-mode paragraph); otherwise treat them as read-only.
 

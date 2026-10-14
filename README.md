@@ -210,7 +210,7 @@ Driver mode is **conversation-scoped** — every new conversation starts in back
 
 **Requirements:** [Claude Code](https://claude.com/claude-code), or **VS Code with GitHub Copilot Chat** — the Copilot entry point and chat modes use VS Code's [prompt files](https://code.visualstudio.com/docs/copilot/customization/prompt-files) and [custom chat modes](https://code.visualstudio.com/docs/copilot/customization/custom-chat-modes), so Copilot in other IDEs (JetBrains, Xcode, Eclipse) won't pick them up. Chisel itself is plain Markdown — nothing to build or install.
 
-Chisel installs *into the project you want to scaffold*. Copy the scaffolder source into your repo root:
+Chisel installs *into the project you want to scaffold*. **Copy only these three folders — not the whole Chisel repo.** Chisel's own README, LICENSE, docs, and git history would make it think the project *is* Chisel (it stops and warns you if that happens). Copy the scaffolder source into your repo root:
 
 ```
 your-project/
