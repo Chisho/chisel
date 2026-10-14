@@ -57,7 +57,7 @@ Add any other notes to `.docs/` (API docs, decisions, runbooks) — the assistan
 
 ## Tips
 
-- Testing: {{TEST_INSTRUCTIONS}}
+- For how to run the tests (and other project specifics), see the rules file listed above — the assistant follows it automatically.
 - Ask *"what's on the todo list?"* to pick up where you left off.
 - Ask *"how do I …?"* about this setup — the assistant can read this manual too.
 {{IF_GREENFIELD}}

@@ -14,7 +14,7 @@ Before asking anything, silently gather context. Do not assume what the project 
 6. Classify project maturity based on what you found:
    - **Greenfield** — no project manifest and little to no source code (empty repo, or only README/LICENSE). Architecture docs will need to be defined rather than discovered.
    - **Existing** — has a manifest and/or meaningful source code. Architecture docs can be filled from exploration.
-7. Detect the test setup (test directories, test scripts in the manifest, test framework config). Record the test command if found — it fills `{{TEST_INSTRUCTIONS}}` in the rules and the manual. If there is none, `{{TEST_INSTRUCTIONS}}` says so and points to `/dev_tdd`, which proposes setting tests up.
+7. Detect the test setup (test directories, test scripts in the manifest, test framework config). Record the test command if found — it fills `{{TEST_INSTRUCTIONS}}` in the rules. If there is none, `{{TEST_INSTRUCTIONS}}` says so and points to `/dev_tdd`, which proposes setting tests up.
 
 ## Phase 2: Self-Cleanup Notice
 
@@ -180,7 +180,7 @@ Workflow command templates (`.chisel/templates/workflow/dev_*.md.template`) are 
 - **`.docs/todo_done.md`** — Empty completed task archive. Based on `todo_done.md.template`.
 - **`.docs/tasks/.gitkeep`** + **`.docs/tasks/done/.gitkeep`** — empty files so the TASK folders exist in git.
 - **`.docs/templates/task-view.html`**, **`.docs/templates/spec.md`**, **`.docs/templates/plan.md`** — copied verbatim from `.chisel/templates/workflow/task-view.html.template`, `.chisel/templates/task/spec.md.template`, `.chisel/templates/task/plan.md.template`. The workflow commands read them at runtime (`.chisel/` is gone by then).
-- **`.docs/manual.md`** — the user manual, from `manual.md.template`. Fill `{{PROJECT_NAME}}`, `{{AGENTS_TABLE}}` (one row per generated agent: name · what it's for · edits code?), `{{TEST_INSTRUCTIONS}}` (same value as in the rules), and resolve its `{{IF_…}}` blocks (`{{IF_GREENFIELD}}` is kept only for greenfield projects).
+- **`.docs/manual.md`** — the user manual, from `manual.md.template`. Fill `{{PROJECT_NAME}}`, `{{AGENTS_TABLE}}` (one row per generated agent: name · what it's for · edits code?), and resolve its `{{IF_…}}` blocks (`{{IF_GREENFIELD}}` is kept only for greenfield projects). Keep the manual about **how to use the setup** — no project-specific details (test commands, paths, tooling quirks); those belong in the rules and `.docs/architecture.md`.
 - **`.docs/manual.html`** — using `.docs/templates/task-view.html` as the shell, write `.docs/manual.html` from `.docs/manual.md` (leave the template unchanged) the same way the workflow commands do (see the *Render & open* section of `.chisel/templates/workflow/dev_feature.md.template`): fill `{{TITLE}}`, `{{SOURCE_FILE}}`, `{{TOC}}`, `{{CONTENT}}`. Render only — it is opened in Phase 9.
 
 ## Phase 8: Self-Cleanup
