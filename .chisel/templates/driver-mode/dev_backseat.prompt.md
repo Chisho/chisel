@@ -1,6 +1,6 @@
 ---
 description: Revert this conversation to backseat (the default) — main session and subagents edit files directly.
-mode: agent
+agent: agent
 ---
 
 You are executing `/dev_backseat` — flips the current conversation's driver-mode to **backseat** (the default).
@@ -9,7 +9,7 @@ You are executing `/dev_backseat` — flips the current conversation's driver-mo
 
 For the rest of this conversation:
 
-- You (the main Copilot session) and any chat modes you launch operate normally — editing files directly. The user reviews after.
+- You (the main Copilot session) and any custom agents you launch operate normally — editing files directly. The user reviews after.
 - Backseat is the default — `/dev_backseat` is mainly useful to revert after a previous `/dev_mainseat` invocation in the same conversation.
 
 This mode is conversation-scoped. New conversations always start in **backseat** by default; you don't need to invoke this at the start of fresh sessions.

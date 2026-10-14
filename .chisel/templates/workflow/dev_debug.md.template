@@ -7,7 +7,7 @@ description: Find and fix the root cause of a bug or failing test — reproduce,
 {{IF_COPILOT}}
 ---
 description: Find and fix the root cause of a bug or failing test — reproduce, gather evidence, test one hypothesis at a time, fix, add a regression test, verify.
-mode: agent
+agent: agent
 ---
 {{/IF_COPILOT}}
 <!-- Adapted from superpowers by Jesse Vincent (MIT) -->

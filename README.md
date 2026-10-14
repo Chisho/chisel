@@ -14,7 +14,7 @@ Think of it as onboarding a new teammate. Instead of an AI assistant guessing at
 - [How it works](#how-it-works)
 - [Works on any project — empty or existing](#works-on-any-project--empty-or-existing)
 - [What gets generated](#what-gets-generated)
-- [Specialized agents / chat modes](#specialized-agents--chat-modes)
+- [Specialized agents](#specialized-agents)
 - [Workflow: Direct, Quick, Feature](#workflow-direct-quick-feature)
 - [Driver mode: mainseat vs. backseat](#driver-mode-mainseat-vs-backseat)
 - [Installation](#installation)
@@ -64,7 +64,7 @@ Under the hood, a single instruction file (`.chisel/body.md`) drives both the Cl
 3. **Pick target tool** — Claude Code (`.claude/`) or GitHub Copilot (`.github/`). Chisel suggests a default if it detects an existing setup.
 4. **Ask what you want** — full setup, partial setup, add agents, or modify an existing config.
 5. **Handle existing files** — if anything would be overwritten, Chisel asks first (skip / overwrite / back-up-and-overwrite). **It never overwrites without permission**, and an existing todo list keeps every entry.
-6. **Configure** — you choose task types & priority scheme, which agents/chat modes to add (`code-reviewer` is always included), project-specific rules, and whether the project is pre-production. The workflow itself is always included.
+6. **Configure** — you choose task types & priority scheme, which agents to add (`code-reviewer` is always included), project-specific rules, and whether the project is pre-production. The workflow itself is always included.
 7. **Generate** — writes the files, adapting every template to your real stack, paths, and choices. Templates are starting points, not copied verbatim — the exceptions are the driver-mode toggles and the spec / plan / HTML-view formats, which are copied as-is.
 8. **Self-cleanup** — removes the scaffolder source, leaving a clean workspace.
 9. **Explain the system** — opens a short user manual (`.docs/manual.html`) and sums up how to work in a few lines.
@@ -121,8 +121,8 @@ Either way you get the same file set; only the content differs — a form to fil
 ├── copilot-instructions.md    # Project overview + conventions
 ├── instructions/
 │   └── rules.instructions.md  # Workflow rules and constraints
-├── chatmodes/                 # One chat mode per chosen agent
-│   └── *.chatmode.md
+├── agents/                    # One custom agent per chosen agent
+│   └── *.agent.md
 └── prompts/
     ├── dev_feature.prompt.md   # Workflow commands
     ├── dev_plan.prompt.md
@@ -148,9 +148,9 @@ The `.docs/` folder is identical either way — architecture, todo, TASK folders
 
 ---
 
-## Specialized agents / chat modes
+## Specialized agents
 
-Each agent becomes a Claude Code subagent or a Copilot chat mode. **The set below is extensible — these are simply the roles I use.** Pick any combination, drop the ones you don't need, or describe a custom one (*"a data-pipeline engineer"*, *"a technical writer"*) and Chisel generates it from the same template pattern. Nothing is gated by project type; you choose what fits your work.
+Each agent becomes a Claude Code subagent or a Copilot custom agent. **The set below is extensible — these are simply the roles I use.** Pick any combination, drop the ones you don't need, or describe a custom one (*"a data-pipeline engineer"*, *"a technical writer"*) and Chisel generates it from the same template pattern. Nothing is gated by project type; you choose what fits your work.
 
 | Agent                        | Role                                                          | Access    |
 | ---------------------------- | ------------------------------------------------------------- | --------- |
@@ -213,7 +213,7 @@ Driver mode is **conversation-scoped** — every new conversation starts in back
 
 ## Installation
 
-**Requirements:** [Claude Code](https://claude.com/claude-code), or **VS Code with GitHub Copilot Chat** — the Copilot entry point and chat modes use VS Code's [prompt files](https://code.visualstudio.com/docs/copilot/customization/prompt-files) and [custom chat modes](https://code.visualstudio.com/docs/copilot/customization/custom-chat-modes), so Copilot in other IDEs (JetBrains, Xcode, Eclipse) won't pick them up. Chisel itself is plain Markdown — nothing to build or install.
+**Requirements:** [Claude Code](https://claude.com/claude-code), or **VS Code with GitHub Copilot Chat** — the Copilot entry point and custom agents use VS Code's [prompt files](https://code.visualstudio.com/docs/copilot/customization/prompt-files) and [custom agents](https://code.visualstudio.com/docs/copilot/customization/custom-agents), so Copilot in other IDEs (JetBrains, Xcode, Eclipse) won't pick them up. Chisel itself is plain Markdown — nothing to build or install.
 
 Chisel installs *into the project you want to scaffold*. **Copy only these three folders — not the whole Chisel repo.** Chisel's own README, LICENSE, docs, and git history would make it think the project *is* Chisel (it stops and warns you if that happens). Copy the scaffolder source into your repo root:
 
@@ -279,7 +279,7 @@ Works the same on an empty repo or an established codebase — see [Works on any
     ├── todo.md.template
     ├── todo_done.md.template
     ├── manual.md.template     # user manual
-    ├── agents/                # agent / chat-mode templates
+    ├── agents/                # agent templates (Claude subagents / Copilot custom agents)
     ├── workflow/              # dev_feature / plan / execute / debug / tdd / explore + HTML view
     ├── task/                  # spec / plan formats for TASK folders
     └── driver-mode/           # static mainseat / backseat toggle files

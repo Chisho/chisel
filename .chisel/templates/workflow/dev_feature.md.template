@@ -7,7 +7,7 @@ description: Start a feature TASK — brainstorm with the user one question at a
 {{IF_COPILOT}}
 ---
 description: Start a feature TASK — brainstorm with the user one question at a time, write spec.md, render spec.html, get approval.
-mode: agent
+agent: agent
 ---
 {{/IF_COPILOT}}
 <!-- Adapted from superpowers by Jesse Vincent (MIT) -->

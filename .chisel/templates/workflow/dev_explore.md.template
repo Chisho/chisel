@@ -7,7 +7,7 @@ description: Explore the codebase — a path, a feature, a TASK, or a question �
 {{IF_COPILOT}}
 ---
 description: Explore the codebase — a path, a feature, a TASK, or a question — and explain how it works with file references. Read-only. Optionally saves an HTML report to .docs/explore/.
-mode: agent
+agent: agent
 ---
 {{/IF_COPILOT}}
 

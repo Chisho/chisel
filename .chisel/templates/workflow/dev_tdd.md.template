@@ -7,7 +7,7 @@ description: Test-first development — write a failing test, watch it fail, wri
 {{IF_COPILOT}}
 ---
 description: Test-first development — write a failing test, watch it fail, write the minimal code to pass, refactor.
-mode: agent
+agent: agent
 ---
 {{/IF_COPILOT}}
 <!-- Adapted from superpowers by Jesse Vincent (MIT) -->

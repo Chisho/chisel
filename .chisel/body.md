@@ -28,7 +28,7 @@ Before any other questions, show this notice and wait for acknowledgement:
 > - `.claude/skills/dev-chisel/` — the Claude Code skill entry
 > - `.github/prompts/dev-chisel.prompt.md` — the Copilot prompt entry
 >
-> Everything generated stays: the instruction index, rules, agents / chat modes, the workflow and driver-mode commands, and `.docs/`. You will **not** be able to run `/dev-chisel` again in this project without reinstalling it.
+> Everything generated stays: the instruction index, rules, agents, the workflow and driver-mode commands, and `.docs/`. You will **not** be able to run `/dev-chisel` again in this project without reinstalling it.
 >
 > **Type "ok" to acknowledge and continue.**
 
@@ -40,7 +40,7 @@ Ask the user which AI coding assistant this setup is for:
 
 > **Target tool?**
 > 1. **Claude Code** — uses `.claude/` (CLAUDE.md, rules, agents)
-> 2. **GitHub Copilot** — uses `.github/` (copilot-instructions.md, instructions, chat modes)
+> 2. **GitHub Copilot** — uses `.github/` (copilot-instructions.md, instructions, custom agents)
 
 If Phase 1 detected an existing setup, suggest that as the default but let the user override.
 
@@ -58,9 +58,9 @@ Present what you found:
 Then ask:
 
 > **What would you like to do?**
-> 1. **Full setup** — Create the complete configuration (instructions, rules, agents/chat modes, workflow commands, .docs)
+> 1. **Full setup** — Create the complete configuration (instructions, rules, agents, workflow commands, .docs)
 > 2. **Partial setup** — Choose which pieces to create
-> 3. **Add agents / chat modes** — Add specific ones to an existing setup
+> 3. **Add agents** — Add specific ones to an existing setup
 > 4. **Modify existing** — Update or extend files that already exist
 
 ## Phase 5: Handle Existing Files
@@ -75,6 +75,8 @@ If ANY target file already exists:
 
 NEVER overwrite without explicit permission. This is a hard rule.
 
+**Copilot, older setups:** if the `.github/chatmodes/` folder with `.chatmode.md` files exists (VS Code's former format), offer to migrate them: rename each to `<name>.agent.md`, move it to `.github/agents/`, and update its frontmatter as above. Current VS Code reads custom agents from `.github/agents/`.
+
 `.docs/todo.md` and `.docs/todo_done.md` with existing entries are never replaced or reset, in every mode and whatever the user picks above: merge — add the new Convention lines (and a `TASK` section if missing) and keep every entry and tally as-is.
 
 **The workflow bundle is all-or-nothing, in every mode** (including Partial setup and Modify existing): the six workflow commands, `.docs/templates/`, `.docs/tasks/`, the manual, and the rules sections `Workflow — Triage / Direct / Quick / Feature`, `Verify Before Claiming Done`, `Review Feedback`, plus the Driver-Mode bookkeeping line. If the user picks **Skip** for an existing rules file, ask once whether to append the missing sections to it; if yes, append the missing sections without touching the rest; if no, warn in Phase 9 that the workflow commands rely on those sections.
@@ -87,7 +89,7 @@ Ask the user what task types and priority scale they want for their todo system.
 
 Let the user define what fits their project. A `TASK` type is always included — feature TASKs (`/dev_feature`) are numbered from its tally — so add it if the user's list doesn't have it, and say so.
 
-### Agents / Chat Modes
+### Agents
 
 List every `*.md.template` in `.chisel/templates/agents/` and present each as a possibility — do not gate any of them by project type. The default set is:
 
@@ -134,7 +136,7 @@ Using the templates from `.chisel/templates/` as starting points, generate all f
 
 - The project's actual tech stack, language, and framework (only what you confirmed)
 - The project's directory structure and patterns
-- The user's chosen agents / chat modes, task types, and rules
+- The user's chosen agents, task types, and rules
 - Real file paths and system names from the codebase
 - The target tool's file format and location conventions
 
@@ -164,7 +166,7 @@ Workflow command templates (`.chisel/templates/workflow/dev_*.md.template`) are 
 
 - **`.github/copilot-instructions.md`** — Brief project overview + conventions. Adapt from `CLAUDE.md.template`.
 - **`.github/instructions/rules.instructions.md`** — Instructions file. Adapt from `rules.md.template`. Must include the Driver-Mode section from the template.
-- **`.github/chatmodes/*.chatmode.md`** — One chat mode per chosen agent, adapted from `.chisel/templates/agents/` to Copilot's chat-mode format.
+- **`.github/agents/<name>.agent.md`** — One VS Code custom agent per chosen agent, adapted from `.chisel/templates/agents/`: keep `name` and `description` in the frontmatter, map `tools` to Copilot tool names (read-only agents get only read/search tools; code-modifying agents also get edit tools), drop Claude-only fields (`model: inherit`, `color`), and replace `.claude/…` paths in the body with their Copilot equivalents.
 - **`.github/prompts/dev_mainseat.prompt.md`** + **`.github/prompts/dev_backseat.prompt.md`** — Driver-mode toggle prompt entry points. Copy verbatim from `.chisel/templates/driver-mode/dev_mainseat.prompt.md` and `.chisel/templates/driver-mode/dev_backseat.prompt.md`.
 - **`.github/prompts/<name>.prompt.md`** for each of `dev_feature`, `dev_plan`, `dev_execute`, `dev_debug`, `dev_tdd`, `dev_explore` — workflow commands, from `.chisel/templates/workflow/<name>.md.template` (see *Workflow conditionals*).
 

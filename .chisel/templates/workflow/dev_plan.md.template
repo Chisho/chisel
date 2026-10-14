@@ -7,7 +7,7 @@ description: Turn an approved TASK spec into a plan of work items with agents, d
 {{IF_COPILOT}}
 ---
 description: Turn an approved TASK spec into a plan of work items with agents, dependencies, files, and parallel groups; render plan.html; get approval.
-mode: agent
+agent: agent
 ---
 {{/IF_COPILOT}}
 <!-- Adapted from superpowers by Jesse Vincent (MIT) -->
@@ -20,7 +20,7 @@ You are executing `/dev_plan` — turn an approved spec into work items that age
 2. **Find the TASK** — use the one the user named. Otherwise look in `.docs/todo.md` for TASKs at `specced`: if exactly one, use it; if several, ask which.
 3. **Check the status** — it must be `specced`. If it's `brainstorming`, say *"The spec isn't approved yet — run `/dev_feature` first."* and stop. If it's `planned` or `in-progress` and the user asks to revise the plan (or `/dev_execute` sent you here), revise instead: keep items marked ✅, re-derive the rest from the spec, re-check groups and coverage, update Progress, and after approval set the status back to `planned` (nothing done yet) or `in-progress n/m`. If a `plan.md` already exists at `specced`, ask whether to revise it or start over.
 4. Read the TASK's `spec.md` in full, then the code its Design section touches.
-5. List the project's agents ({{IF_CLAUDE}}`.claude/agents/`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/chatmodes/`{{/IF_COPILOT}}) — work items are assigned to them.
+5. List the project's agents ({{IF_CLAUDE}}`.claude/agents/`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/agents/`{{/IF_COPILOT}}) — work items are assigned to them.
 
 ## Steps
 

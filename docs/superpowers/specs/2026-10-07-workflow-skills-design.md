@@ -248,3 +248,7 @@ A sixth workflow command, always generated, written in the same style (not adapt
 - **Answer in chat:** Summary · How it works (`path:line`) · Key files · Connections · Observations · Docs drift. Follow-ups invited.
 - **Optional report:** asked once at the end; on yes → `.docs/explore/<slug>.md` + `.html`, rendered and opened like specs and plans. Slug as TASK folders; collisions get the date, then `-2`.
 - **Rules:** read-only in any driver-mode; only writes the report on yes; suggests (never adds) todo entries; code questions aren't tiered by triage.
+
+## 10. Amendment (2026-10-14) — current VS Code Copilot format
+
+Found during a Copilot test run and confirmed against the VS Code docs: custom chat modes are now **custom agents** in `.github/agents/<name>.agent.md`, and prompt files use `agent: agent` (not `mode: agent`). Chisel's Copilot target now generates that format everywhere (agents, workflow and driver-mode prompts, the `dev-chisel` entry) and offers to migrate an older `.github/chatmodes/` folder. Where §4.2, §4.8 and §4.9 say "chat mode", read "custom agent". Using custom agents as Copilot subagents in `/dev_execute` is deferred.
