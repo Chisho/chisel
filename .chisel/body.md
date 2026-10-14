@@ -77,7 +77,7 @@ NEVER overwrite without explicit permission. This is a hard rule.
 
 `.docs/todo.md` and `.docs/todo_done.md` with existing entries are never replaced or reset, in every mode and whatever the user picks above: merge — add the new Convention lines (and a `TASK` section if missing) and keep every entry and tally as-is.
 
-**The workflow bundle is all-or-nothing, in every mode** (including Partial setup and Modify existing): the five workflow commands, `.docs/templates/`, `.docs/tasks/`, the manual, and the rules sections `Workflow — Triage / Direct / Quick / Feature`, `Verify Before Claiming Done`, `Review Feedback`, plus the Driver-Mode bookkeeping line. If the user picks **Skip** for an existing rules file, ask once whether to append the missing sections to it; if yes, append the missing sections without touching the rest; if no, warn in Phase 9 that the workflow commands rely on those sections.
+**The workflow bundle is all-or-nothing, in every mode** (including Partial setup and Modify existing): the six workflow commands, `.docs/templates/`, `.docs/tasks/`, the manual, and the rules sections `Workflow — Triage / Direct / Quick / Feature`, `Verify Before Claiming Done`, `Review Feedback`, plus the Driver-Mode bookkeeping line. If the user picks **Skip** for an existing rules file, ask once whether to append the missing sections to it; if yes, append the missing sections without touching the rest; if no, warn in Phase 9 that the workflow commands rely on those sections.
 
 ## Phase 6: Configure
 
@@ -112,7 +112,7 @@ For user-added templates not named above, infer the group from the template's `t
 
 ### Workflow
 
-No question — the Direct / Quick / Feature workflow and all five workflow commands (`/dev_feature`, `/dev_plan`, `/dev_execute`, `/dev_debug`, `/dev_tdd`) are always generated.
+No question — the Direct / Quick / Feature workflow and all six workflow commands (`/dev_feature`, `/dev_plan`, `/dev_execute`, `/dev_debug`, `/dev_tdd`, `/dev_explore`) are always generated.
 
 ### Project-Specific Rules
 
@@ -158,7 +158,7 @@ Workflow command templates (`.chisel/templates/workflow/dev_*.md.template`) are 
 - **`.claude/rules/rules.md`** — Auto-loaded rules with workflow, conventions, and project-specific constraints. Based on `rules.md.template`. Must include the Driver-Mode section from the template — that's how the main session knows to honor mainseat / backseat for the conversation.
 - **`.claude/agents/*.md`** — One file per chosen agent, adapted from templates in `.chisel/templates/agents/`.
 - **`.claude/skills/dev_mainseat/SKILL.md`** + **`.claude/skills/dev_backseat/SKILL.md`** — Driver-mode toggle skill entry points. Copy verbatim from `.chisel/templates/driver-mode/dev_mainseat.SKILL.md` and `.chisel/templates/driver-mode/dev_backseat.SKILL.md`.
-- **`.claude/skills/<name>/SKILL.md`** for each of `dev_feature`, `dev_plan`, `dev_execute`, `dev_debug`, `dev_tdd` — workflow commands, from `.chisel/templates/workflow/<name>.md.template` (see *Workflow conditionals*).
+- **`.claude/skills/<name>/SKILL.md`** for each of `dev_feature`, `dev_plan`, `dev_execute`, `dev_debug`, `dev_tdd`, `dev_explore` — workflow commands, from `.chisel/templates/workflow/<name>.md.template` (see *Workflow conditionals*).
 
 ### Files to generate — GitHub Copilot target
 
@@ -166,7 +166,7 @@ Workflow command templates (`.chisel/templates/workflow/dev_*.md.template`) are 
 - **`.github/instructions/rules.instructions.md`** — Instructions file. Adapt from `rules.md.template`. Must include the Driver-Mode section from the template.
 - **`.github/chatmodes/*.chatmode.md`** — One chat mode per chosen agent, adapted from `.chisel/templates/agents/` to Copilot's chat-mode format.
 - **`.github/prompts/dev_mainseat.prompt.md`** + **`.github/prompts/dev_backseat.prompt.md`** — Driver-mode toggle prompt entry points. Copy verbatim from `.chisel/templates/driver-mode/dev_mainseat.prompt.md` and `.chisel/templates/driver-mode/dev_backseat.prompt.md`.
-- **`.github/prompts/<name>.prompt.md`** for each of `dev_feature`, `dev_plan`, `dev_execute`, `dev_debug`, `dev_tdd` — workflow commands, from `.chisel/templates/workflow/<name>.md.template` (see *Workflow conditionals*).
+- **`.github/prompts/<name>.prompt.md`** for each of `dev_feature`, `dev_plan`, `dev_execute`, `dev_debug`, `dev_tdd`, `dev_explore` — workflow commands, from `.chisel/templates/workflow/<name>.md.template` (see *Workflow conditionals*).
 
 ### Files to generate — shared (either target)
 
@@ -192,9 +192,9 @@ Always runs (acknowledged in Phase 2), but only after Phase 7 completed. If gene
 After deletion, verify the listed paths no longer exist.
 
 **Do NOT delete:**
-- `.claude/skills/dev_mainseat/`, `.claude/skills/dev_backseat/` and `.claude/skills/dev_{feature,plan,execute,debug,tdd}/` (Claude Code target)
-- `.github/prompts/dev_mainseat.prompt.md`, `.github/prompts/dev_backseat.prompt.md` and `.github/prompts/dev_{feature,plan,execute,debug,tdd}.prompt.md` (Copilot target)
-- `.docs/` — including `.docs/templates/`, `.docs/tasks/`, `.docs/manual.md`, `.docs/manual.html`
+- `.claude/skills/dev_mainseat/`, `.claude/skills/dev_backseat/` and `.claude/skills/dev_{feature,plan,execute,debug,tdd,explore}/` (Claude Code target)
+- `.github/prompts/dev_mainseat.prompt.md`, `.github/prompts/dev_backseat.prompt.md` and `.github/prompts/dev_{feature,plan,execute,debug,tdd,explore}.prompt.md` (Copilot target)
+- `.docs/` — including `.docs/templates/`, `.docs/tasks/`, `.docs/explore/` (if present), `.docs/manual.md`, `.docs/manual.html`
 - Any other generated artifact (`CLAUDE.md`, agents, rules, etc.)
 
 ## Phase 9: Explain the System

@@ -1,0 +1,68 @@
+{{IF_CLAUDE}}
+---
+name: dev_explore
+description: Explore the codebase — a path, a feature, a TASK, or a question — and explain how it works with file references. Read-only. Optionally saves an HTML report to .docs/explore/. Use when the user wants to understand code before changing it.
+---
+{{/IF_CLAUDE}}
+{{IF_COPILOT}}
+---
+description: Explore the codebase — a path, a feature, a TASK, or a question — and explain how it works with file references. Read-only. Optionally saves an HTML report to .docs/explore/.
+mode: agent
+---
+{{/IF_COPILOT}}
+
+You are executing `/dev_explore` — help the user understand part of the codebase. You explain; you never change project code.
+
+## Before starting
+
+1. Read `.docs/architecture.md`, the rules file ({{IF_CLAUDE}}`.claude/rules/rules.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/instructions/rules.instructions.md`{{/IF_COPILOT}}), and any other `.docs/` file related to the topic.
+2. **Find the target.**
+   - **No argument** → ask *"What do you want to explore?"* as one multiple-choice question: up to 3 key systems from `.docs/architecture.md`, *"A path or file"*, *"A question about the code"*.
+   - **A path or glob** (`src/auth/`, `*.sql`) → use it as the scope.
+   - **A TASK** (`TASK-012`) → read its `spec.md` and `plan.md` (in `.docs/tasks/` or `.docs/tasks/done/`); the scope is the files its plan lists.
+   - **A feature name or question** (*"checkout flow"*, *"how do retries work?"*) → locate it by searching the code for the relevant names, routes, and entry points.
+3. If the scope is ambiguous (several unrelated matches, or a whole large repo), ask **one** question to narrow it. Otherwise don't ask — start reading.
+
+## Explore
+
+- Start from the entry points (routes, commands, exported functions, `main`) and follow the flow inward. Read what the flow actually touches; skim the rest.
+- {{IF_CLAUDE}}For a broad scope, delegate the reading to the `architect` agent if it exists, or to the built-in Explore agent, and ask it for file paths and line numbers.{{/IF_CLAUDE}}{{IF_COPILOT}}Explore in this session; for a broad scope, read entry points first and go deeper only where the flow leads.{{/IF_COPILOT}}
+- Note exact `path:line` references as you go — every claim in the answer points at code.
+- Compare what you read with `.docs/`. Disagreements go under *Docs drift*.
+
+## Answer in chat
+
+Scale it to the scope: a single function gets a few lines; a subsystem gets every section.
+
+- **Summary** — what it is and what it's for, in 2–3 sentences.
+- **How it works** — the flow, step by step, each step with a `path:line` reference.
+- **Key files** — the files that matter, one line each.
+- **Connections** — what it depends on, and what depends on it.
+- **Observations** — risks, oddities, dead code, missing tests. Note them; don't fix them.
+- **Docs drift** — where `.docs/` disagrees with the code, or says nothing about something important. Omit if none.
+
+Then invite follow-ups (*"Want me to go deeper into any of these?"*) and answer them the same way.
+
+## Optional report
+
+When the user is done, ask once: *"Save this as a report?"* Only on **yes**:
+
+1. Write `.docs/explore/<slug>.md` — the full answer (including follow-ups worth keeping) under a `# <Topic>` heading, with the date and scope on the line below. Create `.docs/explore/` if it doesn't exist.
+   **Slug** — transliterate accents, lowercase, every non-alphanumeric character becomes `-`, collapse repeated `-`, trim `-` from both ends, cut at a word boundary to 40 characters; if nothing is left, use `explore`. If the file exists, append the date (`-YYYY-MM-DD`), then `-2`, `-3`… if still taken.
+2. Render & open it (below).
+3. Mention that a report worth keeping can be promoted into `.docs/` as permanent documentation, and that the assistant can read it later as context.
+
+### Render & open
+
+1. Read `.docs/templates/task-view.html` and the source `.md`.
+2. Convert the Markdown to HTML yourself: headings get `id`s (lowercase, hyphenated); tables → `<table>`; fenced code → `<pre><code>` with `<`, `>`, `&` escaped; checkboxes → `☐` / `☑`.
+3. Fill `{{TITLE}}` (the doc's H1), `{{SOURCE_FILE}}` (the .md path), `{{TOC}}` (one `<a href="#id">` per H2), `{{CONTENT}}`.
+4. Write the result next to the source with the same name and `.html` extension, replacing any previous version.
+5. Open it: Windows `cmd /c start "" "<path>"` (works from PowerShell, cmd, and Git Bash), macOS `open "<path>"`, Linux `xdg-open "<path>"`. If the command fails or there is no desktop (SSH, WSL without a browser, container), print the absolute path and continue — never stop the skill over this.
+
+## Rules
+
+- **Read-only.** Never edit project code, run migrations, or change config — in any driver-mode. The only file you may write is the report in `.docs/explore/`, and only after the user says yes.
+- Every claim about the code cites `path:line`. If you didn't read it, don't claim it.
+- If you find a bug or work worth doing, **suggest** a todo entry (type, title, one line why) — don't add it unless the user asks.
+- If the user asks you to change something, stop exploring and handle it as a normal request (triage applies).

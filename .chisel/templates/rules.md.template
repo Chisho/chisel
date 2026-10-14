@@ -39,6 +39,8 @@ Before acting on any request, pick a tier. Ask the two questions in order:
 2. **Do all direct conditions hold?** — localized (one function / a few lines / one file); the request says exactly what to do; no design choice; no new dependency. → If yes, **Direct**.
 3. Otherwise → **Quick**.
 
+Questions about the code ("how does X work?", "where is Y?") change nothing, so they aren't tiered: answer directly, and suggest `/dev_explore` when a deeper look would help.
+
 When unsure, pick the heavier tier. Escalation is one-way: if work turns out bigger than its tier, stop, say so, and step up. The user can override either way ("just do it" / `/dev_feature`). `BUG` entries go through `/dev_debug` in any tier above Direct. Driver-mode applies to every tier.
 
 ## Workflow — Direct

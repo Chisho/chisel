@@ -99,6 +99,7 @@ Either way you get the same file set; only the content differs — a form to fil
     ├── dev_execute/
     ├── dev_debug/
     ├── dev_tdd/
+    ├── dev_explore/
     ├── dev_mainseat/          # Driver-mode toggle (see below)
     └── dev_backseat/
 
@@ -108,6 +109,7 @@ Either way you get the same file set; only the content differs — a form to fil
 ├── todo.md                    # Task tracker (your types + priority scheme)
 ├── todo_done.md               # Completed-task archive
 ├── tasks/                     # One folder per feature TASK (spec, plan, HTML views)
+├── explore/                   # Saved /dev_explore reports (created on demand)
 │   └── done/                  # Finished TASKs
 └── templates/                 # Spec / plan / HTML-view formats used by the workflow
 ```
@@ -127,6 +129,7 @@ Either way you get the same file set; only the content differs — a form to fil
     ├── dev_execute.prompt.md
     ├── dev_debug.prompt.md
     ├── dev_tdd.prompt.md
+    ├── dev_explore.prompt.md
     ├── dev_mainseat.prompt.md  # Driver-mode toggles
     └── dev_backseat.prompt.md
 
@@ -190,6 +193,8 @@ Each step waits for your approval and offers the next. The TASK's line in `todo.
 **Readable specs.** Markdown is the source of truth, but every spec and plan is also rendered to a self-contained HTML page (`spec.html`, `plan.html` — light/dark, table of contents, plan laid out by parallel group) and opened in your browser for review. No scripts or build step — the assistant renders it.
 
 **Discipline commands**, usable in any tier: **`/dev_debug`** (root cause before fix, regression test, two-strike rule) and **`/dev_tdd`** (red → green → refactor; proposes setting up tests if the project has none).
+
+**`/dev_explore`** — understand code before changing it. Give it a path, a feature, a TASK, or a question (or nothing, and it asks). It answers in chat with a summary, the flow step by step, key files with `path:line` references, connections, observations, and where `.docs/` has drifted from the code. Read-only; at the end it offers to save the answer as a report in `.docs/explore/` with an HTML view.
 
 The workflow is generated into your project — it doesn't depend on any plugin, so Claude Code and Copilot get the same thing.
 
@@ -275,7 +280,7 @@ Works the same on an empty repo or an established codebase — see [Works on any
     ├── todo_done.md.template
     ├── manual.md.template     # user manual
     ├── agents/                # agent / chat-mode templates
-    ├── workflow/              # dev_feature / plan / execute / debug / tdd + HTML view
+    ├── workflow/              # dev_feature / plan / execute / debug / tdd / explore + HTML view
     ├── task/                  # spec / plan formats for TASK folders
     └── driver-mode/           # static mainseat / backseat toggle files
 .claude/
@@ -288,7 +293,7 @@ Works the same on an empty repo or an established codebase — see [Works on any
 
 ## Acknowledgements
 
-The workflow commands are adapted from [superpowers](https://github.com/obra/superpowers) by Jesse Vincent (MIT), rewritten to be token-light, integrated with Chisel's `.docs/` task system, and generated for both Claude Code and GitHub Copilot.
+The workflow commands (except `/dev_explore`, written in the same style) are adapted from [superpowers](https://github.com/obra/superpowers) by Jesse Vincent (MIT), rewritten to be token-light, integrated with Chisel's `.docs/` task system, and generated for both Claude Code and GitHub Copilot.
 
 ---
 

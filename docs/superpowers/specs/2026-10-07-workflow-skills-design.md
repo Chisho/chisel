@@ -238,3 +238,13 @@ Lives in `.docs/` so the assistant can also read it on demand.
 ## 8. Open questions
 
 None.
+
+## 9. Amendment (2026-10-14) — `/dev_explore`
+
+A sixth workflow command, always generated, written in the same style (not adapted from superpowers, which has no equivalent).
+
+- **Invocation:** no argument → asks what to explore (key systems from `architecture.md`, a path, or a question); or takes a path/glob, feature name, TASK, or question directly.
+- **Process:** read `.docs/` → resolve scope (one clarifying question only if ambiguous) → read code from entry points inward (Claude may delegate to `architect` or the built-in Explore agent).
+- **Answer in chat:** Summary · How it works (`path:line`) · Key files · Connections · Observations · Docs drift. Follow-ups invited.
+- **Optional report:** asked once at the end; on yes → `.docs/explore/<slug>.md` + `.html`, rendered and opened like specs and plans. Slug as TASK folders; collisions get the date, then `-2`.
+- **Rules:** read-only in any driver-mode; only writes the report on yes; suggests (never adds) todo entries; code questions aren't tiered by triage.

@@ -33,6 +33,7 @@ To change a spec or plan, edit the `.md` file (or ask the assistant to), never t
 | `/dev_execute` | Build the work items, review them, close the TASK |
 | `/dev_debug` | Track down a bug's root cause before fixing it |
 | `/dev_tdd` | Make a change test-first |
+| `/dev_explore` | Understand part of the code — give it a path, a feature, a TASK, or a question (or nothing, and it asks). Read-only; can save an HTML report to `.docs/explore/` |
 | `/dev_mainseat` | You drive: the assistant gives you snippets instead of editing files (this conversation only) |
 | `/dev_backseat` | Back to normal: the assistant edits, you review |
 
@@ -48,6 +49,7 @@ To change a spec or plan, edit the `.md` file (or ask the assistant to), never t
 | `.docs/todo.md` / `todo_done.md` | Open and finished work |
 | `.docs/tasks/` | One folder per feature TASK: `spec.md`, `plan.md` and their HTML views |
 | `.docs/tasks/done/` | Finished TASK folders |
+| `.docs/explore/` | Saved `/dev_explore` reports (only when you ask for one) |
 | `.docs/templates/` | Formats for specs, plans, and HTML views — edit only to change the format |
 | {{IF_CLAUDE}}`.claude/rules/rules.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/instructions/rules.instructions.md`{{/IF_COPILOT}} | The rules the assistant follows — add your own conventions here |
 
