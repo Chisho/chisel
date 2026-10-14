@@ -1,0 +1,52 @@
+{{IF_CLAUDE}}
+---
+name: dev_generate_docs
+description: Generate per-system documentation in .docs/systems/ from the code — one doc per key system, with path:line references. Skips systems already documented and suggests /dev_audit_docs for them. Use after setup on an existing codebase.
+---
+{{/IF_CLAUDE}}
+{{IF_COPILOT}}
+---
+description: Generate per-system documentation in .docs/systems/ from the code — one doc per key system, with path:line references. Skips systems already documented and suggests /dev_audit_docs for them.
+agent: agent
+---
+{{/IF_COPILOT}}
+
+You are executing `/dev_generate_docs` — document the codebase system by system so later work (and `/dev_explore`) starts from accurate context. You write docs; you never change project code.
+
+## Before starting
+
+1. Read `.docs/architecture.md` and the rules file ({{IF_CLAUDE}}`.claude/rules/rules.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/instructions/rules.instructions.md`{{/IF_COPILOT}}).
+2. **Greenfield check** — if *Key Systems* in `architecture.md` still holds `{{TODO: …}}` markers, there's nothing to document yet. Say so, point to the kickoff TASK in `.docs/todo.md` (`/dev_feature` on it), and stop.
+3. **Pick the systems.**
+   - **No argument** → list the Key Systems and ask one multiple-choice question: *All*, or pick specific ones.
+   - **A system name** → that system. **A path** → treat it as one system named after the folder.
+   - If the code has an obvious system that Key Systems doesn't list, mention it and offer to include it.
+4. **Check what already exists.** For each chosen system, the doc is `.docs/systems/<slug>.md` (slug: transliterate accents, lowercase, every non-alphanumeric character becomes `-`, collapse repeats, trim, max 40 characters).
+   - **Already documented** → don't regenerate. Say *"Already documented — run `/dev_audit_docs <system>` to check it against the code."*
+   - **All chosen systems documented** → suggest `/dev_audit_docs` and stop.
+   - **Some documented** → generate only the missing ones and suggest auditing the rest at the end.
+   - If the user explicitly wants a documented system regenerated, confirm once (*"This replaces the existing doc. Continue?"*), then include it.
+
+## Explore each system
+
+Each system is explored independently, so run them in parallel where you can:
+{{IF_CLAUDE}}- Launch one subagent per system in a single message (the `architect` agent if it exists, otherwise the built-in Explore agent). Give each the system name, its scope, and the section list below, and ask for `path:line` references.{{/IF_CLAUDE}}{{IF_COPILOT}}- Use **Run Subagent** (`runSubagent`) with one subagent per system (the `architect` custom agent if it exists). Give each the system name, its scope, and the section list below, and ask for `path:line` references. If Run Subagent isn't available, explore the systems one by one in this session.{{/IF_COPILOT}}
+
+For each system: start from its entry points and follow the main flow inward; read what the flow touches; note what it depends on and what depends on it; note anything surprising or fragile.
+
+## Write the docs
+
+1. Create `.docs/systems/` if needed. For each system, copy `.docs/templates/system.md` to `.docs/systems/<slug>.md` and fill every section: Purpose · How it works (each step with `path:line`) · Key files · Connections · Gotchas.
+2. Set **Last verified** to today's date and the current commit (`git rev-parse --short HEAD`; if the project isn't a git repo, write `no git`). Set **Scope** to the folders/files the doc covers — `/dev_audit_docs` uses both.
+3. Only write what you read. No guessed behavior; if something is unclear, say so in Gotchas.
+4. **Link them** — in `.docs/architecture.md`, add or update a `## System docs` section with one line per doc (`- [<System>](systems/<slug>.md) — one-line purpose`). Add the same files to the Context Files list in the index ({{IF_CLAUDE}}`.claude/CLAUDE.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/copilot-instructions.md`{{/IF_COPILOT}}) so they're loaded on demand.
+
+## Finish
+
+Summarize in chat: which docs were created, which were skipped as already documented (with the `/dev_audit_docs` suggestion), and anything noteworthy found (risks, undocumented systems). Suggest todo entries for real problems — don't add them unless asked.
+
+## Rules
+
+- **Never edit project code.** Only write in `.docs/systems/`, the `## System docs` section of `architecture.md`, and the index's Context Files list.
+- Never overwrite an existing system doc without the user's explicit confirmation.
+- Every claim about the code cites `path:line`.

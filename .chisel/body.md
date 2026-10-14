@@ -79,7 +79,7 @@ NEVER overwrite without explicit permission. This is a hard rule.
 
 `.docs/todo.md` and `.docs/todo_done.md` with existing entries are never replaced or reset, in every mode and whatever the user picks above: merge — add the new Convention lines (and a `TASK` section if missing) and keep every entry and tally as-is.
 
-**The workflow bundle is all-or-nothing, in every mode** (including Partial setup and Modify existing): the six workflow commands, `.docs/templates/`, `.docs/tasks/`, the manual, and the rules sections `Workflow — Triage / Direct / Quick / Feature`, `Verify Before Claiming Done`, `Review Feedback`, plus the Driver-Mode bookkeeping line. If the user picks **Skip** for an existing rules file, ask once whether to append the missing sections to it; if yes, append the missing sections without touching the rest; if no, warn in Phase 9 that the workflow commands rely on those sections.
+**The workflow bundle is all-or-nothing, in every mode** (including Partial setup and Modify existing): the eight workflow commands, `.docs/templates/`, `.docs/tasks/`, the manual, and the rules sections `Workflow — Triage / Direct / Quick / Feature`, `Verify Before Claiming Done`, `Review Feedback`, plus the Driver-Mode bookkeeping line. If the user picks **Skip** for an existing rules file, ask once whether to append the missing sections to it; if yes, append the missing sections without touching the rest; if no, warn in Phase 9 that the workflow commands rely on those sections.
 
 ## Phase 6: Configure
 
@@ -114,7 +114,7 @@ For user-added templates not named above, infer the group from the template's `t
 
 ### Workflow
 
-No question — the Direct / Quick / Feature workflow and all six workflow commands (`/dev_feature`, `/dev_plan`, `/dev_execute`, `/dev_debug`, `/dev_tdd`, `/dev_explore`) are always generated.
+No question — the Direct / Quick / Feature workflow and all eight workflow commands (`/dev_feature`, `/dev_plan`, `/dev_execute`, `/dev_debug`, `/dev_tdd`, `/dev_explore`, `/dev_generate_docs`, `/dev_audit_docs`) are always generated.
 
 ### Project-Specific Rules
 
@@ -140,7 +140,7 @@ Using the templates from `.chisel/templates/` as starting points, generate all f
 - Real file paths and system names from the codebase
 - The target tool's file format and location conventions
 
-**Exception — copied verbatim:** files under `.chisel/templates/driver-mode/`, and the three runtime templates `.chisel/templates/workflow/task-view.html.template`, `.chisel/templates/task/spec.md.template`, `.chisel/templates/task/plan.md.template`. Their `{{…}}` placeholders are filled later by the workflow commands, **not** now.
+**Exception — copied verbatim:** files under `.chisel/templates/driver-mode/`, and the four runtime templates `.chisel/templates/workflow/task-view.html.template`, `.chisel/templates/task/spec.md.template`, `.chisel/templates/task/plan.md.template`, `.chisel/templates/system.md.template`. Their `{{…}}` placeholders are filled later by the workflow commands, **not** now.
 
 ### Workflow conditionals
 
@@ -160,7 +160,7 @@ Workflow command templates (`.chisel/templates/workflow/dev_*.md.template`) are 
 - **`.claude/rules/rules.md`** — Auto-loaded rules with workflow, conventions, and project-specific constraints. Based on `rules.md.template`. Must include the Driver-Mode section from the template — that's how the main session knows to honor mainseat / backseat for the conversation.
 - **`.claude/agents/*.md`** — One file per chosen agent, adapted from templates in `.chisel/templates/agents/`.
 - **`.claude/skills/dev_mainseat/SKILL.md`** + **`.claude/skills/dev_backseat/SKILL.md`** — Driver-mode toggle skill entry points. Copy verbatim from `.chisel/templates/driver-mode/dev_mainseat.SKILL.md` and `.chisel/templates/driver-mode/dev_backseat.SKILL.md`.
-- **`.claude/skills/<name>/SKILL.md`** for each of `dev_feature`, `dev_plan`, `dev_execute`, `dev_debug`, `dev_tdd`, `dev_explore` — workflow commands, from `.chisel/templates/workflow/<name>.md.template` (see *Workflow conditionals*).
+- **`.claude/skills/<name>/SKILL.md`** for each of `dev_feature`, `dev_plan`, `dev_execute`, `dev_debug`, `dev_tdd`, `dev_explore`, `dev_generate_docs`, `dev_audit_docs` — workflow commands, from `.chisel/templates/workflow/<name>.md.template` (see *Workflow conditionals*).
 
 ### Files to generate — GitHub Copilot target
 
@@ -168,7 +168,7 @@ Workflow command templates (`.chisel/templates/workflow/dev_*.md.template`) are 
 - **`.github/instructions/rules.instructions.md`** — Instructions file. Adapt from `rules.md.template`. Must include the Driver-Mode section from the template.
 - **`.github/agents/<name>.agent.md`** — One VS Code custom agent per chosen agent, adapted from `.chisel/templates/agents/`: keep `name` and `description` in the frontmatter, map `tools` to Copilot tool names (read-only agents get only read/search tools; code-modifying agents also get edit tools), drop Claude-only fields (`model: inherit`, `color`), and replace `.claude/…` paths in the body with their Copilot equivalents.
 - **`.github/prompts/dev_mainseat.prompt.md`** + **`.github/prompts/dev_backseat.prompt.md`** — Driver-mode toggle prompt entry points. Copy verbatim from `.chisel/templates/driver-mode/dev_mainseat.prompt.md` and `.chisel/templates/driver-mode/dev_backseat.prompt.md`.
-- **`.github/prompts/<name>.prompt.md`** for each of `dev_feature`, `dev_plan`, `dev_execute`, `dev_debug`, `dev_tdd`, `dev_explore` — workflow commands, from `.chisel/templates/workflow/<name>.md.template` (see *Workflow conditionals*).
+- **`.github/prompts/<name>.prompt.md`** for each of `dev_feature`, `dev_plan`, `dev_execute`, `dev_debug`, `dev_tdd`, `dev_explore`, `dev_generate_docs`, `dev_audit_docs` — workflow commands, from `.chisel/templates/workflow/<name>.md.template` (see *Workflow conditionals*).
 
 ### Files to generate — shared (either target)
 
@@ -179,7 +179,7 @@ Workflow command templates (`.chisel/templates/workflow/dev_*.md.template`) are 
   - **Greenfield projects only:** seed the tracker with a top-priority kickoff task, for example: *"Define project scope and initial architecture — fill in `.docs/architecture.md`"*. This gives the next working session a concrete starting point; `/dev_feature` promotes it to a feature TASK.
 - **`.docs/todo_done.md`** — Empty completed task archive. Based on `todo_done.md.template`.
 - **`.docs/tasks/.gitkeep`** + **`.docs/tasks/done/.gitkeep`** — empty files so the TASK folders exist in git.
-- **`.docs/templates/task-view.html`**, **`.docs/templates/spec.md`**, **`.docs/templates/plan.md`** — copied verbatim from `.chisel/templates/workflow/task-view.html.template`, `.chisel/templates/task/spec.md.template`, `.chisel/templates/task/plan.md.template`. The workflow commands read them at runtime (`.chisel/` is gone by then).
+- **`.docs/templates/task-view.html`**, **`.docs/templates/spec.md`**, **`.docs/templates/plan.md`**, **`.docs/templates/system.md`** — copied verbatim from `.chisel/templates/workflow/task-view.html.template`, `.chisel/templates/task/spec.md.template`, `.chisel/templates/task/plan.md.template`, `.chisel/templates/system.md.template`. The workflow commands read them at runtime (`.chisel/` is gone by then).
 - **`.docs/manual.md`** — the user manual, from `manual.md.template`. Fill `{{PROJECT_NAME}}`, `{{AGENTS_TABLE}}` (one row per generated agent: name · what it's for · edits code?), and resolve its `{{IF_…}}` blocks (`{{IF_GREENFIELD}}` is kept only for greenfield projects). Keep the manual about **how to use the setup** — no project-specific details (test commands, paths, tooling quirks); those belong in the rules and `.docs/architecture.md`.
 - **`.docs/manual.html`** — using `.docs/templates/task-view.html` as the shell, write `.docs/manual.html` from `.docs/manual.md` (leave the template unchanged) the same way the workflow commands do (see the *Render & open* section of `.chisel/templates/workflow/dev_feature.md.template`): fill `{{TITLE}}`, `{{SOURCE_FILE}}`, `{{TOC}}`, `{{CONTENT}}`. Render only — it is opened in Phase 9.
 
@@ -194,9 +194,9 @@ Always runs (acknowledged in Phase 2), but only after Phase 7 completed. If gene
 After deletion, verify the listed paths no longer exist.
 
 **Do NOT delete:**
-- `.claude/skills/dev_mainseat/`, `.claude/skills/dev_backseat/` and `.claude/skills/dev_{feature,plan,execute,debug,tdd,explore}/` (Claude Code target)
-- `.github/prompts/dev_mainseat.prompt.md`, `.github/prompts/dev_backseat.prompt.md` and `.github/prompts/dev_{feature,plan,execute,debug,tdd,explore}.prompt.md` (Copilot target)
-- `.docs/` — including `.docs/templates/`, `.docs/tasks/`, `.docs/explore/` (if present), `.docs/manual.md`, `.docs/manual.html`
+- `.claude/skills/dev_mainseat/`, `.claude/skills/dev_backseat/` and `.claude/skills/dev_{feature,plan,execute,debug,tdd,explore,generate_docs,audit_docs}/` (Claude Code target)
+- `.github/prompts/dev_mainseat.prompt.md`, `.github/prompts/dev_backseat.prompt.md` and `.github/prompts/dev_{feature,plan,execute,debug,tdd,explore,generate_docs,audit_docs}.prompt.md` (Copilot target)
+- `.docs/` — including `.docs/templates/`, `.docs/tasks/`, `.docs/systems/` and `.docs/explore/` (if present), `.docs/manual.md`, `.docs/manual.html`
 - Any other generated artifact (`CLAUDE.md`, agents, rules, etc.)
 
 ## Phase 9: Explain the System
@@ -206,6 +206,7 @@ After deletion, verify the listed paths no longer exist.
    - What was set up, one line per area: instructions, rules, agents, workflow commands, `.docs/`. Mention any files backed up (`.old`).
    - How to work: *"Just ask — I'll pick Direct, Quick, or Feature. For a feature I'll ask first."*
    - **Greenfield:** the kickoff TASK in `.docs/todo.md` is the first step — run `/dev_feature TASK-<number>` (name the actual number) to define the project.
+   - **Existing project:** *"Next: run `/dev_generate_docs` to document the codebase system by system — `/dev_explore` and every task start from those docs. Later, `/dev_audit_docs` checks them against the code."*
    - Any files skipped in Phase 5, and whether the workflow sections are missing from a skipped rules file.
    - *"Everything else is in the manual that just opened (`.docs/manual.md`)."*
 3. Confirm the scaffolder source was removed (*"Scaffolder source removed — `/dev-chisel` is gone; everything generated stays."*).
@@ -216,7 +217,7 @@ After deletion, verify the listed paths no longer exist.
 - **Read templates from `.chisel/templates/`** — don't hallucinate template content, actually read the files
 - **Adapt templates to the target tool's conventions** — Copilot and Claude Code have different file formats and directory conventions; don't mix them
 - **Never overwrite without permission** — always ask first
-- **Adapt, don't copy** — templates are starting points, everything must be tailored. **Exceptions:** driver-mode files and the three `.docs/templates/` files are copied verbatim; workflow command templates only get their `{{IF_…}}` blocks resolved.
+- **Adapt, don't copy** — templates are starting points, everything must be tailored. **Exceptions:** driver-mode files and the four `.docs/templates/` files are copied verbatim; workflow command templates only get their `{{IF_…}}` blocks resolved.
 - **Don't prescribe project type** — offer possibilities, let the user define what the project is
 - **Architecture doc must contain real information** — explore the codebase and document what you actually find, don't leave placeholders
 - **Keep the index concise** — `CLAUDE.md` / `copilot-instructions.md` are indexes, not manuals. Detailed info goes in `.docs/`

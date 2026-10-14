@@ -257,3 +257,11 @@ Found during a Copilot test run and confirmed against the VS Code docs: custom c
 
 - **Target detection:** the entry points state the tool they run in; Phase 3 uses it without asking, asks one question only when the project has a setup for the other tool only, and honors an explicit override.
 - **Copilot `/dev_execute`:** work items and `code-reviewer` run as custom-agent subagents via VS Code's Run Subagent tool (`runSubagent`); concurrent when Copilot allows, else sequential; if the tool isn't enabled, the user is told how to enable it and execution falls back to in-session. No `tools:` frontmatter is added (it would restrict the prompt's tools).
+
+## 12. Amendment (2026-10-14) — `/dev_generate_docs` and `/dev_audit_docs`
+
+Two more always-generated commands (not adapted from superpowers), plus `.docs/templates/system.md`.
+
+- **`/dev_generate_docs`:** stops on greenfield (points to the kickoff TASK); asks which Key Systems to document (or takes a system/path); skips systems that already have `.docs/systems/<slug>.md` and suggests `/dev_audit_docs` (regenerates only on explicit confirmation); explores systems in parallel via subagents; writes each doc with Purpose · How it works (`path:line`) · Key files · Connections · Gotchas and a *Last verified* date + commit and *Scope*; links them under `## System docs` in `architecture.md` and the index's Context Files.
+- **`/dev_audit_docs`:** audits `architecture.md` and `.docs/systems/` (or one doc); focuses on changes since *Last verified* via `git log`/`git diff` on the doc's scope while still checking every claim; reports ✅ accurate / ⚠️ outdated / ❌ wrong / ➕ undocumented per doc with `path:line`; applies doc fixes and updates *Last verified* only after approval; never edits code or bends a doc to match a bug.
+- **Setup:** Phase 9 for existing projects recommends `/dev_generate_docs` as the next step. `/dev_explore`'s Docs drift section suggests `/dev_audit_docs`.

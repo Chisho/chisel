@@ -39,7 +39,7 @@ Scale it to the scope: a single function gets a few lines; a subsystem gets ever
 - **Key files** — the files that matter, one line each.
 - **Connections** — what it depends on, and what depends on it.
 - **Observations** — risks, oddities, dead code, missing tests. Note them; don't fix them.
-- **Docs drift** — where `.docs/` disagrees with the code, or says nothing about something important. Omit if none.
+- **Docs drift** — where `.docs/` disagrees with the code, or says nothing about something important. Omit if none; if there is drift, suggest `/dev_audit_docs` to fix the docs.
 
 Then invite follow-ups (*"Want me to go deeper into any of these?"*) and answer them the same way.
 

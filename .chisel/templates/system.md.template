@@ -1,0 +1,26 @@
+# {{SYSTEM_NAME}}
+
+**Last verified:** {{DATE}} at commit `{{COMMIT}}` · **Scope:** {{SCOPE}}
+
+## Purpose
+
+What this system does and why it exists, in 2–4 sentences.
+
+## How it works
+
+The main flow, step by step, each step with a `path:line` reference.
+
+## Key files
+
+| File | Role |
+|---|---|
+| `path/to/file` | … |
+
+## Connections
+
+- **Depends on:** systems, libraries, services, data it needs.
+- **Used by:** what calls it or relies on its output.
+
+## Gotchas
+
+Non-obvious behavior, constraints, known risks, and things that are easy to break. "None found" if none.

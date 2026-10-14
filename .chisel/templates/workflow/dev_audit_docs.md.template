@@ -1,0 +1,56 @@
+{{IF_CLAUDE}}
+---
+name: dev_audit_docs
+description: Audit project docs against the code — check every claim in .docs/architecture.md and .docs/systems/, report what's accurate, outdated, wrong, or undocumented, and fix the docs after approval. Use when docs may have drifted.
+---
+{{/IF_CLAUDE}}
+{{IF_COPILOT}}
+---
+description: Audit project docs against the code — check every claim in .docs/architecture.md and .docs/systems/, report what's accurate, outdated, wrong, or undocumented, and fix the docs after approval.
+agent: agent
+---
+{{/IF_COPILOT}}
+
+You are executing `/dev_audit_docs` — verify that the docs still describe the code, and fix the docs where they don't. You never change project code.
+
+## Before starting
+
+1. Read the rules file ({{IF_CLAUDE}}`.claude/rules/rules.md`{{/IF_CLAUDE}}{{IF_COPILOT}}`.github/instructions/rules.instructions.md`{{/IF_COPILOT}}).
+2. **Pick the docs.**
+   - **No argument** → `.docs/architecture.md` plus every file in `.docs/systems/`.
+   - **A system name or doc path** → that doc only.
+   - If `.docs/systems/` is empty or missing, say so and suggest `/dev_generate_docs` first; audit `architecture.md` alone if the user wants.
+3. Not audited: `todo.md`, `todo_done.md`, `tasks/`, `explore/`, `templates/`, `manual.md` — they track work or explain the setup, not the code.
+
+## Focus on what changed
+
+For each doc, read its **Last verified** commit and **Scope**. If both are present and the project is a git repo, list what changed since then: `git log --oneline <commit>..HEAD -- <scope>` and `git diff --stat <commit>..HEAD -- <scope>`. Check those areas first and hardest — but still verify every claim, because a doc can be wrong from the start.
+
+## Check each doc
+
+Audit docs in parallel where you can:
+{{IF_CLAUDE}}- Launch one subagent per doc in a single message (the `code-reviewer` or `architect` agent, or the built-in Explore agent), each with the doc and the categories below.{{/IF_CLAUDE}}{{IF_COPILOT}}- Use **Run Subagent** (`runSubagent`) with one subagent per doc (the `code-reviewer` or `architect` custom agent). If Run Subagent isn't available, audit the docs one by one in this session.{{/IF_COPILOT}}
+
+Check every claim — file paths, `path:line` references, function and type names, the described flow, connections, and gotchas — against the code, and sort the findings:
+
+- ✅ **Accurate** — matches the code.
+- ⚠️ **Outdated** — was true, but the code changed (moved lines, renamed function, changed flow).
+- ❌ **Wrong** — never matched, or points at something that no longer exists.
+- ➕ **Undocumented** — important code in the doc's scope that the doc doesn't mention (a new entry point, a new dependency, a significant module).
+
+## Report in chat
+
+One short block per doc: the counts per category, then each ⚠️ / ❌ / ➕ finding with the doc line, what the code actually says (`path:line`), and the proposed fix. Docs with everything ✅ get one line. End with: *"Apply these fixes to the docs?"*
+
+## Apply
+
+Only after the user approves (all, or the ones they pick):
+1. Edit the docs — fix references, rewrite outdated sections, add the undocumented parts in the right section.
+2. Update **Last verified** on each doc you checked to today's date and the current commit.
+3. If a system has no doc yet, or a doc describes a system that no longer exists, propose `/dev_generate_docs` or removing the doc (and its line under `## System docs` in `architecture.md`) — don't do either without a yes.
+
+## Rules
+
+- **Never edit project code.** If the code looks wrong rather than the doc, report it and suggest a todo entry — don't fix it, and don't "fix" the doc to match a bug.
+- Never change a doc before the user approves the findings.
+- Every finding cites `path:line`.
